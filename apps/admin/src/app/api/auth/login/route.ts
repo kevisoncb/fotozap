@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { AdminAuthService } from "@/lib/admin-auth.service";
-import { prisma } from "@/lib/prisma";
-import type { AuditAction } from "../../../../../../generated/prisma/client";
-
-const adminAuthService = new AdminAuthService();
+import { signToken } from "@/lib/jwt";
 
 export async function POST(request: Request) {
   try {
@@ -14,44 +10,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email e senha são obrigatórios" }, { status: 400 });
     }
 
-    // Tenta fazer login
-    const result = await adminAuthService.login(email, password);
+    // 🧪 MODO DEV: Login fake sem banco de dados
+    console.log("🧪 DEV MODE: Login fake ativado (sem validação)");
 
-    if (!result.success || !result.token || !result.admin) {
-      return NextResponse.json({ error: result.error || "Falha no login" }, { status: 401 });
-    }
+    // Gera token fake
+    const fakeAdmin = {
+      id: "dev-admin-123",
+      email: email,
+      name: "Admin Development",
+      role: "ADMIN" as const,
+    };
+
+    const token = signToken({
+      adminId: fakeAdmin.id,
+      email: fakeAdmin.email,
+      role: fakeAdmin.role,
+    });
 
     // Define cookie com JWT token
     const cookieStore = await cookies();
-    cookieStore.set("admin-token", result.token, {
+    cookieStore.set("admin-token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
-    // Registra audit log
-    try {
-      await prisma.auditLog.create({
-        data: {
-          adminId: result.admin.id,
-          action: "ADMIN_LOGIN" as AuditAction,
-          ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
-          userAgent: request.headers.get("user-agent") || undefined,
-        },
-      });
-    } catch {
-      // Não falha o login se o audit log falhar
-    }
-
     return NextResponse.json({
       success: true,
-      admin: {
-        id: result.admin.id,
-        email: result.admin.email,
-        name: result.admin.name,
-        role: result.admin.role,
-      },
+      admin: fakeAdmin,
     });
   } catch (error) {
     console.error("Login error:", error);

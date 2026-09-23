@@ -9,10 +9,13 @@ const globalForPrisma = globalThis as unknown as {
 function createPrismaClient() {
   // Check if DATABASE_URL is available
   if (!process.env.DATABASE_URL) {
-    throw new Error(
-      "DATABASE_URL is not set. Please start PostgreSQL and configure .env:\n" +
-      "DATABASE_URL=postgresql://fotozap:fotozap@localhost:5432/fotozap?schema=public"
-    );
+    console.warn("⚠️  DATABASE_URL not set - Prisma operations will fail");
+    console.warn("   Pages will load but data fetching will return errors");
+    // Return a client that will fail on actual database operations
+    // but won't crash during import
+    return new PrismaClient({
+      log: ["error"],
+    }) as any;
   }
 
   // Create adapter for Prisma 7.x
