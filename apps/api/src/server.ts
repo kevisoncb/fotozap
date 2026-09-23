@@ -1,7 +1,6 @@
 import "dotenv/config";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import Redis from "ioredis";
 import { loadEnv } from "./config/env.js";
 import { createPrismaClient } from "./shared/prisma.js";
 import { registerHealthRoutes } from "./modules/health/routes.js";
