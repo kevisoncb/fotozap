@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**FASE 1 CONCLUÍDA**. Pronto para FASE 2 (domain services).
+**FASE 2 CONCLUÍDA**. Pronto para FASE 3 (WhatsApp webhooks e bot).
 
 ## Completed
 
@@ -26,9 +26,23 @@
 - ✅ Documentação (`docs/` com 11 arquivos MD)
 - ✅ Git inicializado, 2 commits
 
+### Fase 2 — Domain Services
+- ✅ **UserService** (findOrCreate, markDeleted, lastInteractionAt)
+- ✅ **ProductService** (listActive, findBySlug)
+- ✅ **OrderService** (create, transitionStatus com validação, findExpired)
+- ✅ **PaymentService** (create, markApproved idempotente, findByExternalId)
+- ✅ **GenerationService** (create anti-duplicação, updateStatus com proteção out-of-order)
+- ✅ **WebhookService** (recordEvent deduplicação, markProcessed)
+- ✅ **MessageService** (create idempotente por externalId)
+- ✅ **26 testes unitários passando** (7 suites)
+- ✅ Todas as transições de estado validadas
+- ✅ Proteção contra webhooks duplicados
+- ✅ Proteção contra gerações simultâneas no mesmo pedido
+- ✅ Lint passando (0 erros)
+
 ## In Progress
 
-Nada. Aguardando início da Fase 2.
+Nada. Aguardando início da Fase 3.
 
 ## Pending
 
