@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
-import type { AuditAction } from "../../../../../../generated/prisma/client.js";
+import type { AuditAction } from "../../../../../../generated/prisma/client";
 
 export async function POST(request: Request) {
   try {

@@ -2,10 +2,10 @@
  * Admin Authentication Service
  */
 
-import { prisma } from "./prisma.js";
-import { hashPassword, verifyPassword } from "./password.js";
-import { signToken } from "./jwt.js";
-import type { AdminRole, AdminStatus } from "../../../../generated/prisma/client.js";
+import { prisma } from "./prisma";
+import { hashPassword, verifyPassword } from "./password";
+import { signToken } from "./jwt";
+import type { AdminRole, AdminStatus } from "../../../../generated/prisma/client";
 
 export interface LoginResult {
   success: boolean;

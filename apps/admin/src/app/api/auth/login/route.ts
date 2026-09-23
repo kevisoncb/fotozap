@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { AdminAuthService } from "@/lib/admin-auth.service";
 import { prisma } from "@/lib/prisma";
-import type { AuditAction } from "../../../../../../generated/prisma/client.js";
+import type { AuditAction } from "../../../../../../generated/prisma/client";
 
 const adminAuthService = new AdminAuthService();
 
