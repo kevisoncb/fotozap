@@ -14,8 +14,14 @@ import { UserService } from "./modules/users/user.service.js";
 import { ProductService } from "./modules/products/product.service.js";
 import { MessageService } from "./modules/messages/message.service.js";
 import { OrderService } from "./modules/orders/order.service.js";
+import { PaymentService } from "./modules/payments/payment.service.js";
+import { WebhookService } from "./modules/webhooks/webhook.service.js";
 import { ImageService } from "./modules/images/image.service.js";
+import { PaymentFlowService } from "./modules/payment/payment-flow.service.js";
+import { MercadoPagoWebhookHandler } from "./modules/mercadopago/webhook.handler.js";
+import { registerMercadoPagoRoutes } from "./modules/mercadopago/routes.js";
 import { createStorageProvider } from "./providers/storage/factory.js";
+import { createPaymentProvider } from "./providers/payment/factory.js";
 
 async function main() {
   const env = loadEnv();
@@ -44,7 +50,7 @@ async function main() {
 
   registerHealthRoutes(app, { prisma, redis });
 
-  // WhatsApp routes
+  // WhatsApp & Payment routes
   if (prisma && redis) {
     const whatsappProvider = createWhatsAppProvider(env.WHATSAPP_PROVIDER, {
       accessToken: env.WHATSAPP_ACCESS_TOKEN,
@@ -61,12 +67,26 @@ async function main() {
       publicUrl: env.R2_PUBLIC_URL,
     });
 
+    const paymentProvider = createPaymentProvider(env.PAYMENT_PROVIDER, {
+      accessToken: env.MERCADOPAGO_ACCESS_TOKEN,
+    });
+
     const conversationService = new ConversationService(redis, env.CONVERSATION_TTL_SECONDS);
     const userService = new UserService(prisma);
     const productService = new ProductService(prisma);
     const messageService = new MessageService(prisma);
     const orderService = new OrderService(prisma);
+    const paymentService = new PaymentService(prisma);
+    const webhookService = new WebhookService(prisma);
     const imageService = new ImageService(storageProvider);
+
+    const paymentFlowService = new PaymentFlowService(
+      prisma,
+      paymentProvider,
+      paymentService,
+      orderService,
+      env.PAYMENT_EXPIRATION_MINUTES,
+    );
 
     const botService = new BotService(
       whatsappProvider,
@@ -81,10 +101,11 @@ async function main() {
       imageService,
       orderService,
       conversationService,
+      paymentFlowService,
       env.MAX_IMAGE_SIZE_MB,
     );
 
-    const webhookHandler = new WhatsAppWebhookHandler(
+    const whatsappWebhookHandler = new WhatsAppWebhookHandler(
       whatsappProvider,
       botService,
       messageService,
@@ -92,16 +113,28 @@ async function main() {
       imageHandler,
     );
 
-    registerWhatsAppRoutes(app, webhookHandler);
+    const mercadoPagoWebhookHandler = new MercadoPagoWebhookHandler(
+      paymentProvider,
+      paymentFlowService,
+      webhookService,
+      env.MERCADOPAGO_WEBHOOK_SECRET ?? "mock_secret",
+    );
 
-    app.log.info({
-      whatsapp: env.WHATSAPP_PROVIDER,
-      storage: env.STORAGE_PROVIDER,
-      maxImageMB: env.MAX_IMAGE_SIZE_MB,
-    }, "WhatsApp routes registered");
+    registerWhatsAppRoutes(app, whatsappWebhookHandler);
+    registerMercadoPagoRoutes(app, mercadoPagoWebhookHandler);
+
+    app.log.info(
+      {
+        whatsapp: env.WHATSAPP_PROVIDER,
+        payment: env.PAYMENT_PROVIDER,
+        storage: env.STORAGE_PROVIDER,
+        maxImageMB: env.MAX_IMAGE_SIZE_MB,
+      },
+      "WhatsApp & Payment routes registered",
+    );
   } else {
     app.log.warn(
-      "WhatsApp routes not registered (DATABASE_URL or REDIS_URL missing). Set them to enable bot.",
+      "WhatsApp & Payment routes not registered (DATABASE_URL or REDIS_URL missing). Set them to enable bot.",
     );
   }
 
