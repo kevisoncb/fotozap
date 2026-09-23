@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**FASE 3 CONCLUÍDA**. Pronto para FASE 4 (Storage + upload de imagens).
+**FASE 4 CONCLUÍDA**. Pronto para FASE 5 (Pagamento Pix + Mercado Pago).
 
 ## Completed
 
@@ -54,9 +54,24 @@
 - ✅ Idempotência por externalMessageId
 - ✅ Documentação atualizada
 
+### Fase 4 — Storage & Image Upload
+- ✅ **IObjectStorage** interface (putObject, getObjectUrl, deleteObject, objectExists)
+- ✅ **MockObjectStorage** (Map em memória para desenvolvimento)
+- ✅ **R2ObjectStorage** (Cloudflare R2 via @aws-sdk/client-s3)
+- ✅ **Factory pattern** (STORAGE_PROVIDER=mock|r2)
+- ✅ **ImageService** (validação: tamanho, mime, bytes; upload; delete)
+- ✅ **WhatsAppImageHandler** (download → validação → upload → vincula Order → atualiza estado)
+- ✅ Validação de imagem: MAX_IMAGE_SIZE_MB, mime types (jpeg/png/webp), tamanho mínimo
+- ✅ Path de storage: `users/{userId}/input/{uuid}.ext` e `users/{userId}/output/{uuid}.ext`
+- ✅ BotService cria Order draft na seleção de produto
+- ✅ Estado `IMAGE_RECEIVED` adicionado ao fluxo
+- ✅ Server.ts integra storage provider e ImageHandler
+- ✅ **49 testes passando** (11 suites, +11 novos testes)
+- ✅ Documentação atualizada (`docs/storage.md`)
+
 ## In Progress
 
-Nada. Aguardando início da Fase 4.
+Nada. Aguardando início da Fase 5.
 
 ## Pending
 
