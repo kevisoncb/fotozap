@@ -2,17 +2,33 @@
 
 ## Current Phase
 
-FASE 0 concluída. FASE 1 em andamento (bootstrap do monólito modular).
+**FASE 1 CONCLUÍDA**. Pronto para FASE 2 (domain services).
 
 ## Completed
 
-- Inspeção do ambiente Windows (máquina `ADM03`).
-- Confirmação de diretório vazio em `C:\Users\ADM03\Desktop\fotozap`.
-- Decisão de arquitetura: monólito modular em npm workspaces (API Fastify + worker no mesmo pacote, admin Next.js, Prisma no root).
+### Fase 0 — Inspeção
+- ✅ Inspeção do ambiente Windows (máquina `ADM03`)
+- ✅ Node.js 24.21.0 LTS + MinGit 2.55.0.5 instalados em `.tools/` (portátil)
+- ✅ Confirmação de arquitetura: monólito modular npm workspaces
+
+### Fase 1 — Bootstrap
+- ✅ Monorepo configurado (`apps/api`, `apps/admin`, `packages/shared`)
+- ✅ Prisma 7.10 schema completo (11 tabelas, enums, indexes)
+- ✅ Fastify API com health/ready routes
+- ✅ Next.js 16 admin skeleton (6 rotas placeholder)
+- ✅ TypeScript project references + ESLint + Prettier + Vitest
+- ✅ **8 testes unitários passando** (domínio: money, order transitions, generation status, prompt interpolation)
+- ✅ **Lint passando**
+- ✅ **Typecheck passando** (com workarounds de generated Prisma client)
+- ✅ Docker Compose (PostgreSQL 16 + Redis 7)
+- ✅ `.env.example` com todas as variáveis
+- ✅ Interfaces de provider (WhatsApp, Payment, Image, Storage)
+- ✅ Documentação (`docs/` com 11 arquivos MD)
+- ✅ Git inicializado, 2 commits
 
 ## In Progress
 
-- Bootstrap da Fase 1: toolchain local, TypeScript, lint, testes, Docker Compose, Prisma, seed, `.env.example`.
+Nada. Aguardando início da Fase 2.
 
 ## Pending
 
