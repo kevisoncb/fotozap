@@ -43,6 +43,7 @@ const schema = z.object({
   R2_BUCKET: z.string().optional(),
   R2_PUBLIC_URL: z.string().optional(),
   ADMIN_SESSION_SECRET: z.string().min(16).optional(),
+  ADMIN_PASSWORD: z.string().min(6).optional(),
   STRICT_ENV: boolish,
 });
 
