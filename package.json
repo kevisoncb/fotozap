@@ -23,6 +23,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
+    "admin:create": "tsx scripts/create-first-admin.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -31,8 +32,10 @@
     "@fastify/rate-limit": "^11.2.0",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
+    "bcrypt": "^6.0.0",
     "bullmq": "^6.3.8",
     "dotenv": "^17.2.3",
+    "jsonwebtoken": "^9.0.3",
     "openai": "^7.23.0",
     "pg": "^8.16.3",
     "zod": "^4.1.11"

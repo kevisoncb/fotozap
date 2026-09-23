@@ -250,10 +250,60 @@ model ConversationAudit {
   @@index([userId, createdAt])
 }
 
+enum AdminRole {
+  ADMIN
+  VIEWER
+}
+
+enum AdminStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum AuditAction {
+  ADMIN_LOGIN
+  ADMIN_LOGOUT
+  ADMIN_CREATED
+  ADMIN_UPDATED
+  ADMIN_SUSPENDED
+  PRODUCT_UPDATED
+  PRODUCT_TOGGLED
+  ORDER_VIEWED
+  GENERATION_VIEWED
+}
+
 model AdminUser {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String      @id @default(cuid())
+  email        String      @unique
   passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  name         String?
+  role         AdminRole   @default(VIEWER)
+  status       AdminStatus @default(ACTIVE)
+  lastLoginAt  DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  createdBy    String?
+  auditLogs    AuditLog[]
+
+  @@index([email])
+  @@index([status])
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  adminId     String
+  action      AuditAction
+  resource    String?
+  resourceId  String?
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime    @default(now())
+
+  admin AdminUser @relation(fields: [adminId], references: [id])
+
+  @@index([adminId, createdAt])
+  @@index([action])
+  @@index([createdAt])
 }

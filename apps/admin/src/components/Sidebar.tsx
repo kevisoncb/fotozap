@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Package, ShoppingCart, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Shield, FileText, LogOut } from "lucide-react";
 
-export function Sidebar() {
+export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -15,10 +15,12 @@ export function Sidebar() {
   };
 
   const links = [
-    { href: "/", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/products", label: "Produtos", icon: Package },
-    { href: "/orders", label: "Pedidos", icon: ShoppingCart },
-  ];
+    { href: "/", label: "Dashboard", icon: LayoutDashboard, adminOnly: false },
+    { href: "/products", label: "Produtos", icon: Package, adminOnly: false },
+    { href: "/orders", label: "Pedidos", icon: ShoppingCart, adminOnly: false },
+    { href: "/admins", label: "Admins", icon: Shield, adminOnly: true },
+    { href: "/audit-logs", label: "Audit Logs", icon: FileText, adminOnly: true },
+  ].filter((link) => !link.adminOnly || isAdmin);
 
   return (
     <aside className="w-64 bg-gray-900 border-r border-gray-800 min-h-screen flex flex-col">
