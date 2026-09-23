@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**FASE 4 CONCLUÍDA**. Pronto para FASE 5 (Pagamento Pix + Mercado Pago).
+**FASE 5 CONCLUÍDA**. Pronto para FASE 6 (Filas BullMQ + Workers).
 
 ## Completed
 
@@ -69,19 +69,37 @@
 - ✅ **49 testes passando** (11 suites, +11 novos testes)
 - ✅ Documentação atualizada (`docs/storage.md`)
 
+### Fase 5 — Payment & Image Providers
+- ✅ **IPaymentProvider** interface (createPix, getPaymentStatus, validateWebhookSignature)
+- ✅ **MockPaymentProvider** (auto-aprova após 5s)
+- ✅ **MercadoPagoProvider** (API v1, PIX)
+- ✅ **POST /webhooks/mercadopago** (validação de assinatura HMAC SHA-256)
+- ✅ **PaymentFlowService** (createPixForOrder, handlePaymentApproved)
+- ✅ **MercadoPagoWebhookHandler** (deduplicação, processamento assíncrono)
+- ✅ **IImageProvider** interface (generateImage, healthCheck)
+- ✅ **MockImageProvider** (URLs mock, delay 500ms)
+- ✅ **OpenAIImageProvider** (DALL-E 3, tamanhos 1024x1024/1792x1024/1024x1792)
+- ✅ Prompt building (prompt + style + negativePrompt)
+- ✅ WhatsApp: após upload, gera Pix e envia código
+- ✅ Estado `WAITING_PAYMENT` adicionado
+- ✅ Formatação de data/hora em PT-BR
+- ✅ Idempotência em Payment.markApproved
+- ✅ Server.ts integra payment provider e webhook handler
+- ✅ **61 testes passando** (14 suites, +12 novos testes)
+- ✅ Documentação: `docs/payment.md`, `docs/image-provider.md`
+
 ## In Progress
 
-Nada. Aguardando início da Fase 5.
+Nada. Aguardando início da Fase 6.
 
 ## Pending
 
-- Fase 5: Integração de pagamento Pix (Mercado Pago).
-- Fase 6: Integração de fila BullMQ (workers de geração, cleanup, expiração).
-- Fase 7: Conectar provider de imagem real.
-- Fase 8: Painel administrativo.
-- Fase 9: Segurança e hardening (rate limiting, helmet, CORS).
-- Fase 10: Testes E2E completos.
-- Fase 11: Deploy.
+- Fase 6: Integração de fila BullMQ (workers: geração, cleanup, expiração).
+- Fase 7: Painel administrativo (visualização de pedidos, usuários, métricas).
+- Fase 8: Segurança e hardening (rate limiting, helmet, CORS, validações).
+- Fase 9: Testes E2E completos (fluxo WhatsApp → pagamento → geração).
+- Fase 10: Deploy (Railway/Render/Fly.io + infraestrutura produção).
+- Fase 11: Monitoring e observabilidade (logs estruturados, métricas, alertas).
 
 ## Blocked
 
@@ -107,4 +125,4 @@ Nada. Aguardando início da Fase 5.
 
 ## Next Step
 
-Início da Fase 5: Integração de pagamento Pix (Mercado Pago).
+Início da Fase 6: Integração de fila BullMQ + workers (geração, cleanup, expiração).
