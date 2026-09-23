@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { GenerationService } from "../../src/modules/generations/generation.service.js";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockPrisma = {
   generation: {
     create: vi.fn(),

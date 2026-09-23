@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { WebhookService } from "../../src/modules/webhooks/webhook.service.js";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockPrisma = {
   webhookEvent: {
     create: vi.fn(),

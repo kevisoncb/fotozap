@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { OrderService } from "../../src/modules/orders/order.service.js";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockPrisma = {
   order: {
     create: vi.fn(),
