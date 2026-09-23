@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**FASE 6 CONCLUÍDA**. Sistema end-to-end funcional! Pronto para FASE 7 (Painel Admin).
+**FASE 8 CONCLUÍDA**. Sistema end-to-end funcional E SEGURO! Pronto para FASE 7 (Painel Admin) ou deploy.
 
 ## Completed
 
@@ -117,9 +117,43 @@
 - ✅ **61 testes passando** (14 suites)
 - ✅ Documentação: `docs/workers.md`
 
+### Fase 8 — Security & Hardening
+- ✅ **Rate Limiting** (Redis-based, proteção financeira)
+  - RateLimiter class com 4 tipos de limite
+  - Messages: 20/minuto por telefone
+  - Uploads: 15/hora por telefone
+  - **Generations: 10/hora** (proteção contra custos OpenAI)
+  - Orders: 10/hora por telefone
+  - Isolamento por número de telefone
+  - TTL automático (60s-3600s)
+  - Feedback ao usuário (remaining + tempo)
+- ✅ **Input Validation** (Zod schemas)
+  - WhatsAppWebhookPayloadSchema (validação rigorosa)
+  - MercadoPagoWebhookPayloadSchema (validação rigorosa)
+  - ZodError → 400 Bad Request
+  - Type-safe validated payloads
+- ✅ **Helmet** (security headers)
+  - Content-Security-Policy (XSS prevention)
+  - X-Frame-Options: DENY (clickjacking)
+  - X-Content-Type-Options, X-XSS-Protection
+  - Strict-Transport-Security (HSTS)
+- ✅ **CORS** configurado
+  - Production: whitelist explícita
+  - Development: allow all
+  - Credentials: true
+- ✅ **Global API Rate Limiting**
+  - @fastify/rate-limit (100 req/min per IP)
+  - Redis-backed
+- ✅ **Signature Validation** (já existia, reforçado)
+  - WhatsApp: x-hub-signature-256 (HMAC SHA-256)
+  - Mercado Pago: x-signature (HMAC SHA-256)
+- ✅ **Log Redaction** (tokens sensíveis)
+- ✅ **70 testes passando** (15 suites, +9 novos)
+- ✅ Documentação: `docs/security.md`
+
 ## In Progress
 
-Nada. **Sistema end-to-end funcional!** Aguardando Fase 7 (Admin) ou decisão de próximos passos.
+Nada. **Sistema end-to-end funcional E SEGURO!** Production-ready.
 
 ## Pending
 
