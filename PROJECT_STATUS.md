@@ -75,8 +75,13 @@ Nada. Aguardando início da Fase 5.
 
 ## Pending
 
-- Fase 2: serviços de domínio (User, Product, Order, Payment, Generation, webhooks).
-- Fase 3+: WhatsApp, imagem, Pix, filas, providers reais, admin funcional, hardening, deploy.
+- Fase 5: Integração de pagamento Pix (Mercado Pago).
+- Fase 6: Integração de fila BullMQ (workers de geração, cleanup, expiração).
+- Fase 7: Conectar provider de imagem real.
+- Fase 8: Painel administrativo.
+- Fase 9: Segurança e hardening (rate limiting, helmet, CORS).
+- Fase 10: Testes E2E completos.
+- Fase 11: Deploy.
 
 ## Blocked
 
@@ -102,4 +107,4 @@ Nada. Aguardando início da Fase 5.
 
 ## Next Step
 
-Concluir Fase 1 (estrutura, Prisma, testes unitários executáveis sem Docker) e, em seguida, Fase 2 (domínio).
+Início da Fase 5: Integração de pagamento Pix (Mercado Pago).
