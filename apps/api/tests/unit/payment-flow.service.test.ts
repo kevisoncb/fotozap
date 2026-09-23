@@ -106,7 +106,10 @@ describe("PaymentFlowService", () => {
     await service.handlePaymentApproved("mp123");
 
     expect(mockPaymentService.markApproved).toHaveBeenCalledWith("pay123");
-    expect(mockOrderService.transitionStatus).toHaveBeenCalledWith("order123", "PAID");
+    expect(mockOrderService.transitionStatus).toHaveBeenCalledWith({
+      orderId: "order123",
+      newStatus: "PAID",
+    });
   });
 
   it("should be idempotent for already approved payment", async () => {

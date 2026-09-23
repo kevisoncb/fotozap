@@ -19,6 +19,8 @@ const schema = z.object({
   PAYMENT_EXPIRATION_MINUTES: z.coerce.number().int().positive().default(30),
   INPUT_RETENTION_HOURS: z.coerce.number().positive().default(24),
   OUTPUT_RETENTION_DAYS: z.coerce.number().positive().default(7),
+  CLEANUP_INTERVAL_HOURS: z.coerce.number().positive().default(6),
+  EXPIRATION_CHECK_INTERVAL_MINUTES: z.coerce.number().int().positive().default(5),
   DISPLAY_TIMEZONE: z.string().default("America/Sao_Paulo"),
   CURRENCY: z.string().default("BRL"),
   WHATSAPP_PROVIDER: z.enum(["mock", "real"]).default("mock"),

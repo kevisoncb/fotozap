@@ -1,7 +1,9 @@
+import type { Queue } from "bullmq";
 import type { PrismaClient } from "../../../../../generated/prisma/client.js";
 import type { IPaymentProvider } from "../../providers/payment/payment.provider.interface.js";
 import type { PaymentService } from "../payments/payment.service.js";
 import type { OrderService } from "../orders/order.service.js";
+import type { GenerationJobData } from "../../queues/generation.queue.js";
 
 export class PaymentFlowService {
   constructor(
@@ -10,6 +12,7 @@ export class PaymentFlowService {
     private paymentService: PaymentService,
     private orderService: OrderService,
     private expirationMinutes: number,
+    private generationQueue?: Queue<GenerationJobData>,
   ) {}
 
   async createPixForOrder(orderId: string): Promise<{
@@ -78,6 +81,31 @@ export class PaymentFlowService {
       return;
     }
 
-    await this.orderService.transitionStatus(payment.orderId, "PAID");
+    await this.orderService.transitionStatus({
+      orderId: payment.orderId,
+      newStatus: "PAID",
+    });
+
+    // Enqueue generation job if queue available
+    if (this.generationQueue) {
+      const order = await this.orderService.findById(payment.orderId);
+
+      if (order?.inputImageKey) {
+        await this.generationQueue.add(
+          `generation-${order.id}`,
+          {
+            orderId: order.id,
+            userId: order.userId,
+            productId: order.productId,
+            inputImageKey: order.inputImageKey,
+          },
+          {
+            jobId: `gen-${order.id}`,
+          },
+        );
+
+        console.log(`[PaymentFlow] Enqueued generation job for order ${order.id}`);
+      }
+    }
   }
 }

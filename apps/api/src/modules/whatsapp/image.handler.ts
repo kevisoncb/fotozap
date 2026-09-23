@@ -66,7 +66,10 @@ export class WhatsAppImageHandler {
 
       await this.orderService.setInputImage(state.orderDraftId, key);
 
-      await this.orderService.transitionStatus(state.orderDraftId, "PENDING_PAYMENT");
+      await this.orderService.transitionStatus({
+        orderId: state.orderDraftId,
+        newStatus: "PENDING_PAYMENT",
+      });
 
       await this.whatsapp.sendText(from, "✅ Foto recebida! Gerando cobrança Pix...");
 
