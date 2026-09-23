@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdmin, getCurrentAdmin } from "@/lib/auth-helpers";
 import { AdminAuthService } from "@/lib/admin-auth.service";
-import type { AdminRole, AdminStatus, AuditAction } from "../../../../../../../generated/prisma/client.js";
+import type { AdminRole, AdminStatus, AuditAction } from "../../../../../../generated/prisma/client.js";
 
 const adminAuthService = new AdminAuthService();
 

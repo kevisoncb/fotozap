@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getCurrentAdmin, requireAdmin } from "@/lib/auth-helpers";
-import type { AuditAction } from "../../../../../../../generated/prisma/client.js";
+import type { AuditAction } from "../../../../../../generated/prisma/client.js";
 
 export async function toggleProductActive(productId: string, active: boolean) {
   // Requer permissão de ADMIN
