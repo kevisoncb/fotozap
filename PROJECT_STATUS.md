@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**FASE 9 CONCLUÍDA**. Sistema COMPLETO (backend + admin + segurança enterprise-grade)! Production-ready.
+**FASE 10 CONCLUÍDA**. Sistema VALIDADO end-to-end com 35+ testes E2E! Production-ready.
 
 ## Completed
 
@@ -242,16 +242,60 @@
 - ✅ **Atualização de .env.example** (JWT_SECRET)
 - ✅ **Total: 84 testes passando** (18 suites)
 
+### Fase 10 — E2E Testing
+- ✅ **Setup E2E** (apps/api/tests/e2e/setup.ts)
+  - Prisma Test Database configuration
+  - Global hooks (beforeAll, afterAll, beforeEach)
+  - cleanDatabase() helper
+  - seedTestData() (2 produtos, 1 admin)
+- ✅ **WhatsApp Flow E2E** (5 testes)
+  - Fluxo completo (19 etapas): menu → produto → imagem → PIX → geração → entrega
+  - Produto inexistente (reject)
+  - Transição inválida (CREATED → COMPLETED)
+  - Webhook duplicado (deduplicação)
+- ✅ **Admin Flow E2E** (8 testes)
+  - Criar admin + login (bcrypt validation)
+  - Audit log creation
+  - RBAC (ADMIN vs VIEWER)
+  - Suspender/reativar admin
+  - Promover VIEWER → ADMIN
+  - Reset de senha
+  - Contar ações por tipo
+  - Buscar logs por recurso
+- ✅ **Error Scenarios E2E** (8 testes)
+  - Pagamento expirado → Order cancelado
+  - Geração falha → Order FAILED
+  - Transições inválidas (CREATED → COMPLETED, COMPLETED → PROCESSING)
+  - Múltiplas gerações simultâneas (prevenção)
+  - Mensagem duplicada (unique constraint)
+  - Produto inativo
+  - Usuário deletado (soft delete)
+- ✅ **Rate Limiting E2E** (14 testes)
+  - Mensagens (20/minuto) - permit/block
+  - Uploads (15/hora) - permit/block
+  - **Gerações (10/hora) - PROTEÇÃO FINANCEIRA** - permit/block
+  - Orders (10/hora) - permit/block
+  - TTL automático (reset após expiração)
+  - Isolamento por telefone
+  - Múltiplos limits simultâneos
+  - Feedback ao usuário (remaining + time)
+- ✅ **Documentação completa** (`docs/testing-e2e.md`)
+  - Setup detalhado
+  - Descrição de cada teste
+  - Exemplos de código
+  - CI/CD integration
+  - Debugging tips
+- ✅ **Total: 119+ testes passando** (22 suites: 18 unit + 4 E2E)
+
 ## In Progress
 
-Nada. **Sistema COMPLETO!** Backend + Admin + Security Enterprise-Grade. Production-ready.
+Nada. **Sistema COMPLETO e VALIDADO!** Backend + Admin + Security + E2E Tests. Production-ready.
 
 ## Pending
 
-- Fase 10: Testes E2E completos (fluxo WhatsApp → pagamento → geração → entrega).
-- Fase 11: Deploy (Railway/Render/Fly.io + setup produção).
+- Fase 11: Deploy (Railway/Render/Fly.io + setup produção, CI/CD).
 - Fase 12: Monitoring e observabilidade (logs estruturados, métricas, Datadog/Sentry).
-- Fase 13: Security Hardening (rate limiting de login, 2FA, token revocation, refresh tokens).
+- Fase 13: Security Hardening adicional (2FA, token revocation, refresh tokens, rate limiting de login).
 
 ## Blocked
 
@@ -277,9 +321,15 @@ Nada. **Sistema COMPLETO!** Backend + Admin + Security Enterprise-Grade. Product
 
 ## Next Step
 
-**Opção A:** Fase 10 — Testes E2E completos (fluxo end-to-end com mocks, validação de todos os cenários).  
-**Opção B:** Fase 11 — Deploy (Railway/Render/Fly.io, setup produção, CI/CD).  
-**Opção C:** Fase 12 — Monitoring (estruturação de logs, métricas, Datadog/Sentry).  
-**Opção D:** Fase 13 — Security Hardening adicional (2FA, token revocation, rate limiting de login).
+**Opção A:** Fase 11 — Deploy (Railway/Render/Fly.io, setup produção, CI/CD, env vars).  
+**Opção B:** Fase 12 — Monitoring (estruturação de logs, métricas, Datadog/Sentry, alertas).  
+**Opção C:** Fase 13 — Security Hardening adicional (2FA, token revocation, refresh tokens, rate limiting de login).
 
-Sistema está **COMPLETO** e **PRODUCTION-READY** com autenticação enterprise-grade, RBAC, audit logging, e segurança reforçada. Decisão depende de prioridade: testes, deploy, observabilidade, ou segurança adicional.
+Sistema está **COMPLETO**, **VALIDADO** e **PRODUCTION-READY** com:
+- ✅ Autenticação enterprise-grade (bcrypt + JWT)
+- ✅ RBAC (ADMIN/VIEWER) + Audit Logging
+- ✅ Rate Limiting (proteção financeira)
+- ✅ 119+ testes (84 unit + 35 E2E) - 100% passando
+- ✅ Documentação completa (16 arquivos MD)
+
+Decisão depende de prioridade: **deploy**, **observabilidade**, ou **segurança adicional**.
