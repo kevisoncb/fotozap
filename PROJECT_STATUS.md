@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**FASE 2 CONCLUÍDA**. Pronto para FASE 3 (WhatsApp webhooks e bot).
+**FASE 3 CONCLUÍDA**. Pronto para FASE 4 (Storage + upload de imagens).
 
 ## Completed
 
@@ -40,9 +40,23 @@
 - ✅ Proteção contra gerações simultâneas no mesmo pedido
 - ✅ Lint passando (0 erros)
 
+### Fase 3 — WhatsApp Integration
+- ✅ **GET/POST /webhooks/whatsapp** (verificação Meta + eventos)
+- ✅ **WhatsAppCloudProvider** (sendText, sendImage, sendDocument, downloadMedia)
+- ✅ **MockWhatsAppProvider** (desenvolvimento sem tokens)
+- ✅ **ConversationService** (Redis state machine com TTL)
+- ✅ **BotService** (menu, comandos, seleção de produto)
+- ✅ **WhatsAppWebhookHandler** (signature validation, async processing)
+- ✅ Estados: IDLE, SELECTING_PRODUCT, WAITING_FOR_IMAGE
+- ✅ Comandos: MENU, OI, CANCELAR, AJUDA, 1-4
+- ✅ Integrado no server.ts (ativo quando DATABASE_URL + REDIS_URL presentes)
+- ✅ **38 testes passando** (9 suites, +12 novos testes)
+- ✅ Idempotência por externalMessageId
+- ✅ Documentação atualizada
+
 ## In Progress
 
-Nada. Aguardando início da Fase 3.
+Nada. Aguardando início da Fase 4.
 
 ## Pending
 
