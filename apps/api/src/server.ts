@@ -9,9 +9,13 @@ import { createWhatsAppProvider } from "./providers/whatsapp/factory.js";
 import { ConversationService } from "./modules/conversations/conversation.service.js";
 import { BotService } from "./modules/whatsapp/bot.service.js";
 import { WhatsAppWebhookHandler } from "./modules/whatsapp/webhook.handler.js";
+import { WhatsAppImageHandler } from "./modules/whatsapp/image.handler.js";
 import { UserService } from "./modules/users/user.service.js";
 import { ProductService } from "./modules/products/product.service.js";
 import { MessageService } from "./modules/messages/message.service.js";
+import { OrderService } from "./modules/orders/order.service.js";
+import { ImageService } from "./modules/images/image.service.js";
+import { createStorageProvider } from "./providers/storage/factory.js";
 
 async function main() {
   const env = loadEnv();
@@ -49,16 +53,35 @@ async function main() {
       appSecret: env.WHATSAPP_APP_SECRET,
     });
 
+    const storageProvider = createStorageProvider(env.STORAGE_PROVIDER, {
+      accountId: env.R2_ACCOUNT_ID,
+      accessKeyId: env.R2_ACCESS_KEY_ID,
+      secretAccessKey: env.R2_SECRET_ACCESS_KEY,
+      bucket: env.R2_BUCKET,
+      publicUrl: env.R2_PUBLIC_URL,
+    });
+
     const conversationService = new ConversationService(redis, env.CONVERSATION_TTL_SECONDS);
     const userService = new UserService(prisma);
     const productService = new ProductService(prisma);
     const messageService = new MessageService(prisma);
+    const orderService = new OrderService(prisma);
+    const imageService = new ImageService(storageProvider);
 
     const botService = new BotService(
       whatsappProvider,
       conversationService,
       userService,
       productService,
+      orderService,
+    );
+
+    const imageHandler = new WhatsAppImageHandler(
+      whatsappProvider,
+      imageService,
+      orderService,
+      conversationService,
+      env.MAX_IMAGE_SIZE_MB,
     );
 
     const webhookHandler = new WhatsAppWebhookHandler(
@@ -66,11 +89,16 @@ async function main() {
       botService,
       messageService,
       userService,
+      imageHandler,
     );
 
     registerWhatsAppRoutes(app, webhookHandler);
 
-    app.log.info("WhatsApp routes registered");
+    app.log.info({
+      whatsapp: env.WHATSAPP_PROVIDER,
+      storage: env.STORAGE_PROVIDER,
+      maxImageMB: env.MAX_IMAGE_SIZE_MB,
+    }, "WhatsApp routes registered");
   } else {
     app.log.warn(
       "WhatsApp routes not registered (DATABASE_URL or REDIS_URL missing). Set them to enable bot.",

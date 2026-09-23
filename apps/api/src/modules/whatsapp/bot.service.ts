@@ -2,6 +2,7 @@ import type { IWhatsAppProvider } from "../../providers/whatsapp/whatsapp.provid
 import type { ConversationService } from "../conversations/conversation.service.js";
 import type { UserService } from "../users/user.service.js";
 import type { ProductService } from "../products/product.service.js";
+import type { OrderService } from "../orders/order.service.js";
 
 export class BotService {
   constructor(
@@ -9,6 +10,7 @@ export class BotService {
     private conversation: ConversationService,
     private userService: UserService,
     private productService: ProductService,
+    private orderService: OrderService,
   ) {}
 
   async handleMessage(from: string, messageId: string, text: string): Promise<void> {
@@ -136,19 +138,31 @@ export class BotService {
       return;
     }
 
+    const user = await this.userService.findByPhone(from);
+    if (!user) {
+      await this.whatsapp.sendText(from, "❌ Erro: usuário não encontrado.");
+      return;
+    }
+
+    const order = await this.orderService.create({
+      userId: user.id,
+      productId: product.id,
+      amountCents: product.priceCents,
+      currency: product.currency,
+    });
+
     await this.whatsapp.sendText(
       from,
       [
         `✅ Você escolheu: ${product.name}`,
         "",
         "📸 Agora envie a sua foto.",
-        "",
-        "(Funcionalidade de receber imagem será implementada na Fase 4)",
       ].join("\n"),
     );
 
     await this.conversation.setState(from, "WAITING_FOR_IMAGE", {
       productId: product.id,
+      orderDraftId: order.id,
     });
   }
 

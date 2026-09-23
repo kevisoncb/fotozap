@@ -4,6 +4,7 @@ import type { BotService } from "./bot.service.js";
 import type { MessageService } from "../messages/message.service.js";
 import type { UserService } from "../users/user.service.js";
 import type { WhatsAppWebhookPayload } from "../../providers/whatsapp/whatsapp.provider.interface.js";
+import type { WhatsAppImageHandler } from "./image.handler.js";
 
 export class WhatsAppWebhookHandler {
   constructor(
@@ -11,6 +12,7 @@ export class WhatsAppWebhookHandler {
     private bot: BotService,
     private messageService: MessageService,
     private userService: UserService,
+    private imageHandler: WhatsAppImageHandler,
   ) {}
 
   async handleVerification(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -101,12 +103,8 @@ export class WhatsAppWebhookHandler {
 
     if (message.type === "text" && message.text?.body) {
       await this.bot.handleMessage(message.from, message.messageId, message.text.body);
-    } else if (message.type === "image") {
-      // Fase 4: download image, upload to R2
-      await this.whatsapp.sendText(
-        message.from,
-        "📸 Imagem recebida! (Processamento será implementado na Fase 4)",
-      );
+    } else if (message.type === "image" && message.image?.id) {
+      await this.imageHandler.handleImageMessage(message.from, message.image.id);
     } else {
       await this.whatsapp.sendText(
         message.from,
