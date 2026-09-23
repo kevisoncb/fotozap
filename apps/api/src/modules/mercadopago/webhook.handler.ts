@@ -2,6 +2,8 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import type { IPaymentProvider } from "../../providers/payment/payment.provider.interface.js";
 import type { PaymentFlowService } from "../payment/payment-flow.service.js";
 import type { WebhookService } from "../webhooks/webhook.service.js";
+import { validateMercadoPagoWebhook } from "../../validation/mercadopago-webhook.schema.js";
+import { ZodError } from "zod";
 
 export class MercadoPagoWebhookHandler {
   constructor(
@@ -25,18 +27,33 @@ export class MercadoPagoWebhookHandler {
       return;
     }
 
+    // Validate payload structure
+    let validatedPayload;
+    try {
+      validatedPayload = validateMercadoPagoWebhook(request.body);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        request.log.warn({ errors: error.errors }, "Invalid MercadoPago webhook payload");
+        reply.code(400).send({ error: "Invalid payload structure" });
+        return;
+      }
+      throw error;
+    }
+
     reply.code(200).send({ success: true });
 
     setImmediate(async () => {
       try {
-        await this.processWebhook(request.body as MercadoPagoWebhookPayload);
+        await this.processWebhook(validatedPayload);
       } catch (error) {
         request.log.error({ error }, "Failed to process MercadoPago webhook");
       }
     });
   }
 
-  private async processWebhook(payload: MercadoPagoWebhookPayload): Promise<void> {
+  private async processWebhook(
+    payload: ReturnType<typeof validateMercadoPagoWebhook>,
+  ): Promise<void> {
     const eventId = payload.id?.toString() ?? `mp_${Date.now()}`;
 
     const duplicate = await this.webhookService.recordEvent({
@@ -79,11 +96,3 @@ export class MercadoPagoWebhookHandler {
     }
   }
 }
-
-type MercadoPagoWebhookPayload = {
-  id?: number;
-  type?: string;
-  data?: {
-    id?: number;
-  };
-};

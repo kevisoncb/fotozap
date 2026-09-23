@@ -1,6 +1,8 @@
 import "dotenv/config";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import helmet from "@fastify/helmet";
+import rateLimit from "@fastify/rate-limit";
 import { loadEnv } from "./config/env.js";
 import { createPrismaClient } from "./shared/prisma.js";
 import { registerHealthRoutes } from "./modules/health/routes.js";
@@ -32,6 +34,7 @@ import { createCleanupWorker } from "./workers/cleanup.worker.js";
 import { createExpirationWorker } from "./workers/expiration.worker.js";
 import { scheduleCleanupJobs } from "./schedulers/cleanup.scheduler.js";
 import { scheduleExpirationJobs } from "./schedulers/expiration.scheduler.js";
+import { RateLimiter } from "./middleware/rate-limit.js";
 
 async function main() {
   const env = loadEnv();
@@ -48,7 +51,7 @@ async function main() {
     },
   });
 
-  await app.register(cors, { origin: false });
+  // (CORS will be registered after helmet below)
 
   const prisma = env.DATABASE_URL ? createPrismaClient(env.DATABASE_URL) : undefined;
   const redis = env.REDIS_URL
@@ -62,6 +65,14 @@ async function main() {
 
   // WhatsApp, Payment, and Workers
   if (prisma && redis) {
+    // Rate limiter for WhatsApp-specific limits
+    const rateLimiter = new RateLimiter(redis, {
+      maxMessagesPerMinute: env.MAX_MESSAGES_PER_MINUTE,
+      maxUploadsPerHour: env.MAX_UPLOADS_PER_HOUR,
+      maxGenerationsPerHour: env.MAX_GENERATIONS_PER_HOUR,
+      maxOrdersPerHour: env.MAX_ORDERS_PER_HOUR,
+    });
+
     const whatsappProvider = createWhatsAppProvider(env.WHATSAPP_PROVIDER, {
       accessToken: env.WHATSAPP_ACCESS_TOKEN,
       phoneNumberId: env.WHATSAPP_PHONE_NUMBER_ID,
@@ -116,6 +127,7 @@ async function main() {
       userService,
       productService,
       orderService,
+      rateLimiter,
     );
 
     const imageHandler = new WhatsAppImageHandler(
@@ -124,6 +136,7 @@ async function main() {
       orderService,
       conversationService,
       paymentFlowService,
+      rateLimiter,
       env.MAX_IMAGE_SIZE_MB,
     );
 
@@ -133,6 +146,7 @@ async function main() {
       messageService,
       userService,
       imageHandler,
+      rateLimiter,
     );
 
     const mercadoPagoWebhookHandler = new MercadoPagoWebhookHandler(

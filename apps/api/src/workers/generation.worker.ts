@@ -80,7 +80,7 @@ export function createGenerationWorker(deps: GenerationWorkerDeps): Worker<Gener
         // 6. Call AI provider
         job.log("Calling AI provider...");
         const result = await deps.imageProvider.generateImage({
-          prompt: product.promptTemplate || "Transform this image",
+          prompt: product.prompt || "Transform this image",
           referenceImageUrl: inputImageUrl,
         });
 
@@ -104,12 +104,11 @@ export function createGenerationWorker(deps: GenerationWorkerDeps): Worker<Gener
         job.log(`Uploaded to storage: ${outputKey}`);
 
         // 9. Update generation
+        const generatedImageUrl = await deps.storage.getObjectUrl(outputKey);
         await deps.generationService.updateStatus({
           generationId: generation.id,
           status: "SUCCEEDED",
-          outputImageKey: outputKey,
-          metadata: result.metadata,
-          revisedPrompt: result.revisedPrompt,
+          outputUrl: generatedImageUrl,
         });
 
         // 10. Update order
@@ -117,11 +116,9 @@ export function createGenerationWorker(deps: GenerationWorkerDeps): Worker<Gener
         await deps.orderService.transitionStatus({ orderId, newStatus: "DELIVERY_PENDING" });
 
         // 11. Send to WhatsApp
-        const outputUrl = await deps.storage.getObjectUrl(outputKey);
-
         await deps.whatsapp.sendImage(
           user.whatsappPhone,
-          outputUrl,
+          generatedImageUrl,
           "✅ Sua imagem está pronta! 🎉",
         );
 

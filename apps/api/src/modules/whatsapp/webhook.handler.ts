@@ -3,8 +3,10 @@ import type { IWhatsAppProvider } from "../../providers/whatsapp/whatsapp.provid
 import type { BotService } from "./bot.service.js";
 import type { MessageService } from "../messages/message.service.js";
 import type { UserService } from "../users/user.service.js";
-import type { WhatsAppWebhookPayload } from "../../providers/whatsapp/whatsapp.provider.interface.js";
 import type { WhatsAppImageHandler } from "./image.handler.js";
+import type { RateLimiter } from "../../middleware/rate-limit.js";
+import { validateWhatsAppWebhook } from "../../validation/whatsapp-webhook.schema.js";
+import { ZodError } from "zod";
 
 export class WhatsAppWebhookHandler {
   constructor(
@@ -13,6 +15,7 @@ export class WhatsAppWebhookHandler {
     private messageService: MessageService,
     private userService: UserService,
     private imageHandler: WhatsAppImageHandler,
+    private rateLimiter: RateLimiter,
   ) {}
 
   async handleVerification(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -50,18 +53,33 @@ export class WhatsAppWebhookHandler {
       return;
     }
 
+    // Validate payload structure
+    let validatedPayload;
+    try {
+      validatedPayload = validateWhatsAppWebhook(request.body);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        request.log.warn({ errors: error.errors }, "Invalid WhatsApp webhook payload");
+        reply.code(400).send({ error: "Invalid payload structure" });
+        return;
+      }
+      throw error;
+    }
+
     reply.code(200).send({ success: true });
 
     setImmediate(async () => {
       try {
-        await this.processWebhook(request.body as WhatsAppWebhookPayload);
+        await this.processWebhook(validatedPayload);
       } catch (error) {
         request.log.error({ error }, "Failed to process WhatsApp webhook");
       }
     });
   }
 
-  private async processWebhook(payload: WhatsAppWebhookPayload): Promise<void> {
+  private async processWebhook(
+    payload: ReturnType<typeof validateWhatsAppWebhook>,
+  ): Promise<void> {
     if (payload.object !== "whatsapp_business_account") {
       return;
     }
@@ -84,9 +102,20 @@ export class WhatsAppWebhookHandler {
   }
 
   private async handleIncomingMessage(
-    message: WhatsAppWebhookPayload["entry"][0]["changes"][0]["value"]["messages"][0],
+    message: ReturnType<typeof validateWhatsAppWebhook>["entry"][0]["changes"][0]["value"]["messages"][0],
   ): Promise<void> {
     if (!message) return;
+
+    // Rate limit check for messages
+    const messageLimit = await this.rateLimiter.checkMessages(message.from);
+    if (!messageLimit.allowed) {
+      const remainingTime = await this.rateLimiter.getRemainingTime(message.from, "messages");
+      await this.whatsapp.sendText(
+        message.from,
+        `⏸️ Você atingiu o limite de mensagens. Aguarde ${Math.ceil(remainingTime / 60)} minuto(s).`,
+      );
+      return;
+    }
 
     const user = await this.userService.findOrCreate({
       whatsappPhone: message.from,
@@ -104,6 +133,17 @@ export class WhatsAppWebhookHandler {
     if (message.type === "text" && message.text?.body) {
       await this.bot.handleMessage(message.from, message.messageId, message.text.body);
     } else if (message.type === "image" && message.image?.id) {
+      // Rate limit check for uploads
+      const uploadLimit = await this.rateLimiter.checkUploads(message.from);
+      if (!uploadLimit.allowed) {
+        const remainingTime = await this.rateLimiter.getRemainingTime(message.from, "uploads");
+        await this.whatsapp.sendText(
+          message.from,
+          `📸 Limite de uploads atingido. Você pode enviar mais ${uploadLimit.remaining} foto(s) em ${Math.ceil(remainingTime / 60)} minuto(s).`,
+        );
+        return;
+      }
+
       await this.imageHandler.handleImageMessage(message.from, message.image.id);
     } else {
       await this.whatsapp.sendText(

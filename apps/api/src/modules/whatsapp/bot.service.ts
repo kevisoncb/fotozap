@@ -3,6 +3,7 @@ import type { ConversationService } from "../conversations/conversation.service.
 import type { UserService } from "../users/user.service.js";
 import type { ProductService } from "../products/product.service.js";
 import type { OrderService } from "../orders/order.service.js";
+import type { RateLimiter } from "../../middleware/rate-limit.js";
 
 export class BotService {
   constructor(
@@ -11,6 +12,7 @@ export class BotService {
     private userService: UserService,
     private productService: ProductService,
     private orderService: OrderService,
+    private rateLimiter: RateLimiter,
   ) {}
 
   async handleMessage(from: string, messageId: string, text: string): Promise<void> {
@@ -135,6 +137,17 @@ export class BotService {
 
     if (!product) {
       await this.whatsapp.sendText(from, "❌ Produto não encontrado.");
+      return;
+    }
+
+    // Rate limit check for order creation
+    const orderLimit = await this.rateLimiter.checkOrders(from);
+    if (!orderLimit.allowed) {
+      const remainingTime = await this.rateLimiter.getRemainingTime(from, "orders");
+      await this.whatsapp.sendText(
+        from,
+        `🛑 Limite de pedidos atingido. Você pode criar ${orderLimit.remaining} pedido(s) em ${Math.ceil(remainingTime / 60)} minuto(s).`,
+      );
       return;
     }
 

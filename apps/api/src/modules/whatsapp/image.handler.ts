@@ -3,6 +3,7 @@ import type { ImageService } from "../images/image.service.js";
 import type { OrderService } from "../orders/order.service.js";
 import type { ConversationService } from "../conversations/conversation.service.js";
 import type { PaymentFlowService } from "../payment/payment-flow.service.js";
+import type { RateLimiter } from "../../middleware/rate-limit.js";
 
 export class WhatsAppImageHandler {
   constructor(
@@ -11,6 +12,7 @@ export class WhatsAppImageHandler {
     private orderService: OrderService,
     private conversationService: ConversationService,
     private paymentFlowService: PaymentFlowService,
+    private rateLimiter: RateLimiter,
     private maxImageSizeMB: number,
   ) {}
 
@@ -28,6 +30,17 @@ export class WhatsAppImageHandler {
     if (!state.productId || !state.orderDraftId) {
       await this.whatsapp.sendText(from, "❌ Erro interno. Digite MENU e tente novamente.");
       await this.conversationService.setState(from, "IDLE");
+      return;
+    }
+
+    // Rate limit check for generations (preventive check before creating payment)
+    const generationLimit = await this.rateLimiter.checkGenerations(from);
+    if (!generationLimit.allowed) {
+      const remainingTime = await this.rateLimiter.getRemainingTime(from, "generations");
+      await this.whatsapp.sendText(
+        from,
+        `🎨 Limite de gerações atingido. Você pode criar ${generationLimit.remaining} geração(ões) em ${Math.ceil(remainingTime / 60)} minuto(s). Digite MENU para mais opções.`,
+      );
       return;
     }
 
