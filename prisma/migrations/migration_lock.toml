@@ -1,0 +1,5 @@
+# PostgreSQL, generated from prisma/schema.prisma
+# Prisma migrations were not applied on this machine during bootstrap
+# because Docker/PostgreSQL were not available.
+
+provider = "postgresql"

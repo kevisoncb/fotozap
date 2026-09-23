@@ -1,0 +1,9 @@
+# Environment
+
+Copie `.env.example` para `.env`. Nunca commite `.env`.
+
+Em `development` e `test`, secrets de WhatsApp/Mercado Pago/IA/R2 são opcionais (providers `mock`).
+
+Em `production`, a API recusa subir sem `DATABASE_URL`, `REDIS_URL` e `ADMIN_SESSION_SECRET`.
+
+Valores monetários entram como inteiros em centavos (`299` = R$ 2,99). Datas no banco em UTC; `DISPLAY_TIMEZONE=America/Sao_Paulo` só para apresentação.
