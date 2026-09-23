@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**FASE 5 CONCLUÍDA**. Pronto para FASE 6 (Filas BullMQ + Workers).
+**FASE 6 CONCLUÍDA**. Sistema end-to-end funcional! Pronto para FASE 7 (Painel Admin).
 
 ## Completed
 
@@ -88,18 +88,46 @@
 - ✅ **61 testes passando** (14 suites, +12 novos testes)
 - ✅ Documentação: `docs/payment.md`, `docs/image-provider.md`
 
+### Fase 6 — BullMQ Workers & Queues
+- ✅ **BullMQ** instalado e configurado
+- ✅ **GenerationQueue** (3 attempts, exponential backoff)
+- ✅ **CleanupQueue** (2 attempts, fixed backoff)
+- ✅ **ExpirationQueue** (2 attempts, fixed backoff)
+- ✅ **GenerationWorker** (concurrency configurável)
+  - Enfileirado quando pagamento aprovado
+  - Busca dados (Order, Product, User)
+  - Cria Generation record
+  - Chama OpenAI DALL-E 3
+  - Baixa imagem gerada (URL temporária)
+  - Upload para storage (`output/`)
+  - Atualiza Order: PROCESSING → GENERATION_COMPLETED → DELIVERY_PENDING → COMPLETED
+  - Envia via WhatsApp com caption
+  - Error handling: Order → FAILED, notifica usuário
+- ✅ **CleanupWorker** (serializado)
+  - Input images: > INPUT_RETENTION_HOURS (24h)
+  - Output images: > OUTPUT_RETENTION_DAYS (7d)
+  - Dry run support
+- ✅ **ExpirationWorker** (serializado)
+  - Cancela Payment e Order expirados
+- ✅ **Schedulers** (cleanup 6h, expiration 5min)
+- ✅ Graceful shutdown (fecha workers, queues, timers)
+- ✅ Worker event logging (completed, failed)
+- ✅ Job logs para debugging
+- ✅ PaymentFlowService enfileira generation job
+- ✅ **61 testes passando** (14 suites)
+- ✅ Documentação: `docs/workers.md`
+
 ## In Progress
 
-Nada. Aguardando início da Fase 6.
+Nada. **Sistema end-to-end funcional!** Aguardando Fase 7 (Admin) ou decisão de próximos passos.
 
 ## Pending
 
-- Fase 6: Integração de fila BullMQ (workers: geração, cleanup, expiração).
-- Fase 7: Painel administrativo (visualização de pedidos, usuários, métricas).
-- Fase 8: Segurança e hardening (rate limiting, helmet, CORS, validações).
-- Fase 9: Testes E2E completos (fluxo WhatsApp → pagamento → geração).
-- Fase 10: Deploy (Railway/Render/Fly.io + infraestrutura produção).
-- Fase 11: Monitoring e observabilidade (logs estruturados, métricas, alertas).
+- Fase 7: Painel administrativo (Next.js routes funcionais, visualização orders/users/generations).
+- Fase 8: Segurança e hardening (rate limiting, helmet, CORS, input validation).
+- Fase 9: Testes E2E completos (fluxo WhatsApp → pagamento → geração → entrega).
+- Fase 10: Deploy (Railway/Render/Fly.io + setup produção).
+- Fase 11: Monitoring e observabilidade (logs estruturados, métricas, Datadog/Sentry).
 
 ## Blocked
 
@@ -125,4 +153,8 @@ Nada. Aguardando início da Fase 6.
 
 ## Next Step
 
-Início da Fase 6: Integração de fila BullMQ + workers (geração, cleanup, expiração).
+**Opção A:** Fase 7 — Painel administrativo (CRUD de pedidos/usuários, métricas básicas).  
+**Opção B:** Fase 8 — Segurança e hardening (production-ready).  
+**Opção C:** Deploy e teste completo com Docker + seeds.
+
+Sistema já está funcional end-to-end com mocks. Decisão depende de prioridade: visualização (admin), segurança, ou deploy.
