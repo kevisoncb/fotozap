@@ -4,6 +4,14 @@ import cors from "@fastify/cors";
 import { loadEnv } from "./config/env.js";
 import { createPrismaClient } from "./shared/prisma.js";
 import { registerHealthRoutes } from "./modules/health/routes.js";
+import { registerWhatsAppRoutes } from "./modules/whatsapp/routes.js";
+import { createWhatsAppProvider } from "./providers/whatsapp/factory.js";
+import { ConversationService } from "./modules/conversations/conversation.service.js";
+import { BotService } from "./modules/whatsapp/bot.service.js";
+import { WhatsAppWebhookHandler } from "./modules/whatsapp/webhook.handler.js";
+import { UserService } from "./modules/users/user.service.js";
+import { ProductService } from "./modules/products/product.service.js";
+import { MessageService } from "./modules/messages/message.service.js";
 
 async function main() {
   const env = loadEnv();
@@ -31,6 +39,43 @@ async function main() {
     : undefined;
 
   registerHealthRoutes(app, { prisma, redis });
+
+  // WhatsApp routes
+  if (prisma && redis) {
+    const whatsappProvider = createWhatsAppProvider(env.WHATSAPP_PROVIDER, {
+      accessToken: env.WHATSAPP_ACCESS_TOKEN,
+      phoneNumberId: env.WHATSAPP_PHONE_NUMBER_ID,
+      verifyToken: env.WHATSAPP_VERIFY_TOKEN,
+      appSecret: env.WHATSAPP_APP_SECRET,
+    });
+
+    const conversationService = new ConversationService(redis, env.CONVERSATION_TTL_SECONDS);
+    const userService = new UserService(prisma);
+    const productService = new ProductService(prisma);
+    const messageService = new MessageService(prisma);
+
+    const botService = new BotService(
+      whatsappProvider,
+      conversationService,
+      userService,
+      productService,
+    );
+
+    const webhookHandler = new WhatsAppWebhookHandler(
+      whatsappProvider,
+      botService,
+      messageService,
+      userService,
+    );
+
+    registerWhatsAppRoutes(app, webhookHandler);
+
+    app.log.info("WhatsApp routes registered");
+  } else {
+    app.log.warn(
+      "WhatsApp routes not registered (DATABASE_URL or REDIS_URL missing). Set them to enable bot.",
+    );
+  }
 
   app.addHook("onClose", async () => {
     await prisma?.$disconnect();
