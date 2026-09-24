@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { RateLimiter } from "../../src/middleware/rate-limit.js";
 import Redis from "ioredis-mock";
+import type { Redis as RedisType } from "ioredis";
 
 describe("RateLimiter", () => {
-  let redis: Redis;
+  let redis: RedisType;
   let rateLimiter: RateLimiter;
 
   beforeEach(() => {

@@ -40,8 +40,8 @@ export function createExpirationWorker(deps: ExpirationWorkerDeps): Worker<Expir
             data: { status: "CANCELLED" },
           });
 
-          // Cancel order if still pending payment
-          if (payment.order.status === "PENDING_PAYMENT") {
+          // Cancel order if still awaiting payment
+          if (payment.order.status === "AWAITING_PAYMENT") {
             await deps.prisma.order.update({
               where: { id: payment.orderId },
               data: { status: "CANCELLED" },

@@ -57,8 +57,8 @@ export class MercadoPagoWebhookHandler {
     const eventId = payload.id?.toString() ?? `mp_${Date.now()}`;
 
     const duplicate = await this.webhookService.recordEvent({
-      source: "mercadopago",
-      eventId,
+      provider: "mercadopago",
+      externalEventId: eventId,
       eventType: payload.type ?? "unknown",
       payload,
     });

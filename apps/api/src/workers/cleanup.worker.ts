@@ -58,8 +58,8 @@ export function createCleanupWorker(deps: CleanupWorkerDeps): Worker<CleanupJobD
         }
       }
 
-      // Find expired output images (Generations)
-      const expiredGenerations = await deps.prisma.generation.findMany({
+      // Find expired output images (Orders with output images)
+      const expiredOutputOrders = await deps.prisma.order.findMany({
         where: {
           outputImageKey: { not: null },
           completedAt: { lt: outputCutoff },
@@ -70,23 +70,23 @@ export function createCleanupWorker(deps: CleanupWorkerDeps): Worker<CleanupJobD
         },
       });
 
-      job.log(`Found ${expiredGenerations.length} expired output images`);
+      job.log(`Found ${expiredOutputOrders.length} expired output images`);
 
       let deletedOutputCount = 0;
 
-      for (const generation of expiredGenerations) {
-        if (!generation.outputImageKey) continue;
+      for (const order of expiredOutputOrders) {
+        if (!order.outputImageKey) continue;
 
         if (!dryRun) {
           try {
-            await deps.storage.deleteObject(generation.outputImageKey);
-            await deps.prisma.generation.update({
-              where: { id: generation.id },
+            await deps.storage.deleteObject(order.outputImageKey);
+            await deps.prisma.order.update({
+              where: { id: order.id },
               data: { outputImageKey: null },
             });
             deletedOutputCount++;
           } catch (error) {
-            job.log(`Failed to delete output image: ${generation.outputImageKey}`);
+            job.log(`Failed to delete output image: ${order.outputImageKey}`);
           }
         }
       }

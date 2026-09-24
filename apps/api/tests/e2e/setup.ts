@@ -8,15 +8,20 @@
  */
 
 import { PrismaClient } from "../../../../generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { beforeAll, afterAll, beforeEach } from "vitest";
+import pg from "pg";
 
-export const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.TEST_DATABASE_URL || "file:./test.db",
-    },
-  },
-});
+// Configure test database
+const TEST_DB_URL = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
+
+export const prisma = TEST_DB_URL
+  ? (() => {
+      const pool = new pg.Pool({ connectionString: TEST_DB_URL });
+      const adapter = new PrismaPg(pool);
+      return new PrismaClient({ adapter });
+    })()
+  : new PrismaClient();
 
 /**
  * Setup global test hooks

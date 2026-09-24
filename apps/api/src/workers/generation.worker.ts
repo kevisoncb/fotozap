@@ -24,7 +24,7 @@ export function createGenerationWorker(deps: GenerationWorkerDeps): Worker<Gener
   const worker = new Worker<GenerationJobData>(
     QUEUE_NAMES.GENERATION,
     async (job: Job<GenerationJobData>) => {
-      const { orderId, userId, inputImageKey } = job.data;
+      const { orderId, userId } = job.data;
 
       job.log(`Starting generation for order ${orderId}`);
 
@@ -54,8 +54,7 @@ export function createGenerationWorker(deps: GenerationWorkerDeps): Worker<Gener
       // 3. Create Generation record
       const generation = await deps.generationService.create({
         orderId,
-        inputImageKey,
-        prompt: product.promptTemplate || "Transform this image",
+        prompt: product.prompt || "Transform this image",
         provider: "openai",
       });
 
@@ -75,7 +74,10 @@ export function createGenerationWorker(deps: GenerationWorkerDeps): Worker<Gener
         );
 
         // 5. Get input image URL
-        const inputImageUrl = await deps.storage.getObjectUrl(inputImageKey);
+        const inputImageUrl = order.inputImageUrl;
+        if (!inputImageUrl) {
+          throw new Error(`NO_INPUT_IMAGE:${orderId}`);
+        }
 
         // 6. Call AI provider
         job.log("Calling AI provider...");

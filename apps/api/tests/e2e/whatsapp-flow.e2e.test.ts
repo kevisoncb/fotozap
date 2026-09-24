@@ -48,7 +48,7 @@ describe("E2E: WhatsApp Flow", () => {
     const whatsappPhone = "5511999887766";
 
     // 1. Usuário envia "oi" (primeira interação)
-    const user = await userService.findOrCreate(whatsappPhone);
+    const user = await userService.findOrCreate({ whatsappPhone });
     expect(user.whatsappPhone).toBe(whatsappPhone);
     expect(user.status).toBe("ACTIVE");
 
@@ -80,9 +80,7 @@ describe("E2E: WhatsApp Flow", () => {
 
     // 5. Usuário envia imagem (simulado)
     const inputImageKey = `users/${user.id}/input/test-image.jpg`;
-    await orderService.update(order.id, {
-      inputImageKey,
-    });
+    await orderService.setInputImage(order.id, inputImageKey);
 
     // 6. Sistema transiciona para AWAITING_PAYMENT
     const updatedOrder = await orderService.transitionStatus({
@@ -116,8 +114,11 @@ describe("E2E: WhatsApp Flow", () => {
     });
 
     // 9. Sistema marca pagamento como aprovado
-    const approvedPayment = await paymentService.markApproved(payment.id);
-    expect(approvedPayment.status).toBe("APPROVED");
+    const changed = await paymentService.markApproved(payment.id);
+    expect(changed).toBe(true);
+    
+    const approvedPayment = await paymentService.findById(payment.id);
+    expect(approvedPayment?.status).toBe("APPROVED");
 
     // 10. Sistema transiciona pedido para PAID
     const paidOrder = await orderService.transitionStatus({
@@ -153,8 +154,6 @@ describe("E2E: WhatsApp Flow", () => {
       generationId: generation.id,
       status: "SUCCEEDED",
       outputUrl: `https://storage.example.com/users/${user.id}/output/generated-${order.id}.jpg`,
-      estimatedCost: "0.04",
-      durationMs: 8500,
     });
 
     expect(succeededGeneration.status).toBe("SUCCEEDED");
@@ -222,7 +221,7 @@ describe("E2E: WhatsApp Flow", () => {
   });
 
   it("deve falhar se produto não existir", async () => {
-    const user = await userService.findOrCreate("5511999887766");
+    const user = await userService.findOrCreate({ whatsappPhone: "5511999887766" });
 
     await expect(
       orderService.create({
@@ -234,7 +233,7 @@ describe("E2E: WhatsApp Flow", () => {
   });
 
   it("deve impedir transição inválida de status", async () => {
-    const user = await userService.findOrCreate("5511999887766");
+    const user = await userService.findOrCreate({ whatsappPhone: "5511999887766" });
     const products = await productService.listActive();
     const order = await orderService.create({
       userId: user.id,

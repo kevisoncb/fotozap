@@ -26,7 +26,7 @@ export class PaymentFlowService {
       throw new Error("ORDER_NOT_FOUND");
     }
 
-    if (order.status !== "PENDING_PAYMENT") {
+    if (order.status !== "AWAITING_PAYMENT") {
       throw new Error(`ORDER_INVALID_STATUS:${order.status}`);
     }
 
@@ -49,15 +49,13 @@ export class PaymentFlowService {
     await this.paymentService.create({
       orderId: order.id,
       externalPaymentId: pixResult.externalPaymentId,
-      method: "PIX",
+      provider: this.paymentProvider.constructor.name.toLowerCase().replace('provider', ''),
       status: "PENDING",
       amountCents: order.amountCents,
       currency: order.currency,
       expiresAt: pixResult.expiresAt,
-      metadata: {
-        pixCode: pixResult.pixCode,
-        pixQrCodeUrl: pixResult.pixQrCodeUrl,
-      },
+      pixCode: pixResult.pixCode,
+      pixQrCodeUrl: pixResult.pixQrCodeUrl,
     });
 
     return {
@@ -90,14 +88,13 @@ export class PaymentFlowService {
     if (this.generationQueue) {
       const order = await this.orderService.findById(payment.orderId);
 
-      if (order?.inputImageKey) {
+      if (order) {
         await this.generationQueue.add(
           `generation-${order.id}`,
           {
             orderId: order.id,
             userId: order.userId,
             productId: order.productId,
-            inputImageKey: order.inputImageKey,
           },
           {
             jobId: `gen-${order.id}`,

@@ -15,9 +15,10 @@ import { UserService } from "../../src/modules/users/user.service.js";
 import { ProductService } from "../../src/modules/products/product.service.js";
 import { OrderService } from "../../src/modules/orders/order.service.js";
 import Redis from "ioredis-mock";
+import type { Redis as RedisType } from "ioredis";
 
 describe("E2E: Rate Limiting", () => {
-  let redis: Redis;
+  let redis: RedisType;
   let userService: UserService;
   let productService: ProductService;
   let orderService: OrderService;
@@ -243,7 +244,7 @@ describe("E2E: Rate Limiting", () => {
   describe("Rate Limit Integration", () => {
     it("deve aplicar múltiplos rate limits simultaneamente", async () => {
       const phone = "5511999887766";
-      const user = await userService.findOrCreate(phone);
+      const user = await userService.findOrCreate({ whatsappPhone: phone });
       const products = await productService.listActive();
 
       // Simula 5 operações completas

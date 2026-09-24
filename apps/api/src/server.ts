@@ -3,6 +3,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
+import Redis from "ioredis";
 import { loadEnv } from "./config/env.js";
 import { createPrismaClient } from "./shared/prisma.js";
 import { registerHealthRoutes } from "./modules/health/routes.js";
@@ -55,7 +56,7 @@ async function main() {
 
   const prisma = env.DATABASE_URL ? createPrismaClient(env.DATABASE_URL) : undefined;
   const redis = env.REDIS_URL
-    ? new (await import("ioredis")).default(env.REDIS_URL, {
+    ? new Redis(env.REDIS_URL, {
         maxRetriesPerRequest: 1,
         lazyConnect: true,
       })

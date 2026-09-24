@@ -6,7 +6,6 @@ export type GenerationJobData = {
   orderId: string;
   userId: string;
   productId: string;
-  inputImageKey: string;
 };
 
 export function createGenerationQueue(redis: Redis): Queue<GenerationJobData> {
