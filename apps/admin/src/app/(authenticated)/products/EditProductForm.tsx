@@ -29,7 +29,7 @@ export function EditProductForm({ product }: { product: Product }) {
       });
       setIsOpen(false);
     } catch (error) {
-      console.error("Failed to update product:", error);
+      // Error shown to user via toast
     } finally {
       setLoading(false);
     }

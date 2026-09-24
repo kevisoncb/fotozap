@@ -33,7 +33,7 @@ export class MercadoPagoWebhookHandler {
       validatedPayload = validateMercadoPagoWebhook(request.body);
     } catch (error) {
       if (error instanceof ZodError) {
-        request.log.warn({ errors: error.errors }, "Invalid MercadoPago webhook payload");
+        request.log.warn({ errors: error.issues }, "Invalid MercadoPago webhook payload");
         reply.code(400).send({ error: "Invalid payload structure" });
         return;
       }

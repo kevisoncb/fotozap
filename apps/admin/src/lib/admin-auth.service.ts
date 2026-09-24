@@ -5,7 +5,7 @@
 import { prisma } from "./prisma";
 import { hashPassword, verifyPassword } from "./password";
 import { signToken } from "./jwt";
-import type { AdminRole, AdminStatus } from "../../../../generated/prisma/client";
+import type { AdminRole, AdminStatus } from "@prisma/client";
 
 export interface LoginResult {
   success: boolean;

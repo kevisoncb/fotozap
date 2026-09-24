@@ -33,7 +33,7 @@ export class OpenAIImageProvider implements IImageProvider {
       response_format: "url",
     });
 
-    const image = response.data[0];
+    const image = response.data?.[0];
 
     if (!image?.url) {
       throw new Error("OPENAI_NO_IMAGE_URL");

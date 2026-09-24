@@ -1,0 +1,33 @@
+infra/cloud-fixes: Railway deployment fixes
+
+🔧 Correções para deploy na Railway/Render
+
+Problema:
+- API retornava 404 e "train has not arrived at station"
+- Sistema crashava com variáveis provisórias (aguardando_meta)
+- Faltava clareza na orquestração de serviços do monorepo
+
+Correções Aplicadas:
+
+1. Fix Port Binding (apps/api/src/config/env.ts)
+   - API_PORT agora respeita process.env.PORT (padrão Railway)
+   - Fallback para 3001 em desenvolvimento
+
+2. Graceful Degradation (apps/api/src/server.ts)
+   - Sistema inicia mesmo com tokens inválidos/provisórios
+   - Fallback automático para mock providers quando detecta "aguardando"
+   - Logs de warning claros
+   - Aplicado para: WhatsApp, Mercado Pago, OpenAI, Cloudflare R2
+
+3. Service Orchestration (Procfile)
+   - Documentação clara para múltiplos serviços
+   - Instruções para Railway/Render
+
+4. Admin Port Fix (apps/admin/package.json)
+   - Next.js agora respeita process.env.PORT
+
+Documentação:
+- docs/CLOUD_FIXES.md (detalhes técnicos completos)
+- docs/deploy-production.md (atualizado com referência)
+
+Status: ✅ Sistema pronto para deploy na Railway

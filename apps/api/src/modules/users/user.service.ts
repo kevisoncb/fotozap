@@ -1,4 +1,4 @@
-import type { PrismaClient, User } from "../../../../../generated/prisma/client.js";
+import type { PrismaClient, User } from "@prisma/client";
 
 export type CreateUserInput = {
   whatsappPhone: string;

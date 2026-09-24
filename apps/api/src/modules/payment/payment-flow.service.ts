@@ -1,5 +1,5 @@
 import type { Queue } from "bullmq";
-import type { PrismaClient } from "../../../../../generated/prisma/client.js";
+import type { PrismaClient } from "@prisma/client";
 import type { IPaymentProvider } from "../../providers/payment/payment.provider.interface.js";
 import type { PaymentService } from "../payments/payment.service.js";
 import type { OrderService } from "../orders/order.service.js";
@@ -101,7 +101,7 @@ export class PaymentFlowService {
           },
         );
 
-        console.log(`[PaymentFlow] Enqueued generation job for order ${order.id}`);
+        // Generation job enqueued successfully (job.id logged by BullMQ)
       }
     }
   }

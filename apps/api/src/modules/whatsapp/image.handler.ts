@@ -111,7 +111,7 @@ export class WhatsAppImageHandler {
         orderDraftId: state.orderDraftId,
       });
     } catch (error) {
-      console.error("Failed to handle image:", error);
+      // Error already logged by caller, no action needed
       await this.whatsapp.sendText(
         from,
         "❌ Erro ao processar imagem. Tente novamente ou digite CANCELAR.",

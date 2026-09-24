@@ -2,12 +2,15 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": ".",
+    "rootDir": "src",
     "outDir": "dist",
     "noEmit": false,
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@fotozap/shared": ["../../packages/shared/dist/index.d.ts"]
+    }
   },
-  "include": ["src", "tests"],
-  "exclude": ["dist", "node_modules"],
+  "include": ["src"],
+  "exclude": ["dist", "node_modules", "tests"],
   "references": [{ "path": "../../packages/shared" }]
 }

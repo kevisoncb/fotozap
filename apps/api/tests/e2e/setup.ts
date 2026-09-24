@@ -7,7 +7,7 @@
  * - Mock Providers (WhatsApp, Payment, Image, Storage)
  */
 
-import { PrismaClient } from "../../../../generated/prisma/client.js";
+import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { beforeAll, afterAll, beforeEach } from "vitest";
 import pg from "pg";
@@ -19,9 +19,9 @@ export const prisma = TEST_DB_URL
   ? (() => {
       const pool = new pg.Pool({ connectionString: TEST_DB_URL });
       const adapter = new PrismaPg(pool);
-      return new PrismaClient({ adapter });
+      return new PrismaClient({ adapter, log: [] });
     })()
-  : new PrismaClient();
+  : new PrismaClient({ log: [] });
 
 /**
  * Setup global test hooks

@@ -1,4 +1,4 @@
-import type { PrismaClient, Message } from "../../../../../generated/prisma/client.js";
+import type { PrismaClient, Message } from "@prisma/client";
 
 export type CreateMessageInput = {
   userId: string;

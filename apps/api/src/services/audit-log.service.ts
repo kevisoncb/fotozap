@@ -4,7 +4,7 @@
  * Registra ações administrativas para auditoria e compliance.
  */
 
-import type { PrismaClient, AuditAction } from "../../../../generated/prisma/client.js";
+import type { PrismaClient, AuditAction } from "@prisma/client";
 
 export interface CreateAuditLogInput {
   adminId: string;

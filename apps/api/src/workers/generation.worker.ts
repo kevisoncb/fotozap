@@ -1,6 +1,6 @@
 import { Worker, Job } from "bullmq";
 import type { Redis } from "ioredis";
-import type { PrismaClient } from "../../../../generated/prisma/client.js";
+import type { PrismaClient } from "@prisma/client";
 import type { IImageProvider } from "../providers/image/image.provider.interface.js";
 import type { IObjectStorage } from "../providers/storage/storage.provider.interface.js";
 import type { IWhatsAppProvider } from "../providers/whatsapp/whatsapp.provider.interface.js";
@@ -56,6 +56,7 @@ export function createGenerationWorker(deps: GenerationWorkerDeps): Worker<Gener
         orderId,
         prompt: product.prompt || "Transform this image",
         provider: "openai",
+        model: "dall-e-3",
       });
 
       job.log(`Generation record created: ${generation.id}`);
@@ -73,8 +74,11 @@ export function createGenerationWorker(deps: GenerationWorkerDeps): Worker<Gener
           "🎨 Gerando sua imagem... Isso pode levar alguns minutos.",
         );
 
-        // 5. Get input image URL
-        const inputImageUrl = order.inputImageUrl;
+        // 5. Get input image URL from storage
+        let inputImageUrl: string | undefined;
+        if (order.inputImageKey) {
+          inputImageUrl = await deps.storageProvider.getPublicUrl(order.inputImageKey);
+        }
         if (!inputImageUrl) {
           throw new Error(`NO_INPUT_IMAGE:${orderId}`);
         }
@@ -162,11 +166,11 @@ export function createGenerationWorker(deps: GenerationWorkerDeps): Worker<Gener
   );
 
   worker.on("completed", (job) => {
-    console.log(`[GenerationWorker] Job ${job.id} completed`);
+    job.log(`Generation worker job ${job.id} completed successfully`);
   });
 
   worker.on("failed", (job, err) => {
-    console.error(`[GenerationWorker] Job ${job?.id} failed:`, err.message);
+    job?.log(`Generation worker failed: ${err instanceof Error ? err.message : String(err)}`);
   });
 
   return worker;

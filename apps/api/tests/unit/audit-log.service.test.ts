@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from "vitest";
 import { AuditLogService } from "../../src/services/audit-log.service.js";
-import type { PrismaClient } from "../../../../generated/prisma/client.js";
+import type { PrismaClient } from "@prisma/client";
 
 describe("AuditLogService", () => {
   let service: AuditLogService;

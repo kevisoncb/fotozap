@@ -2,14 +2,17 @@ import type {
   PrismaClient,
   Payment,
   PaymentStatus,
-} from "../../../../../generated/prisma/client.js";
+} from "@prisma/client";
 
 export type CreatePaymentInput = {
   orderId: string;
   provider: string;
   externalPaymentId: string;
+  status?: PaymentStatus;
   amountCents: number;
   currency?: string;
+  pixCode?: string;
+  pixQrCodeUrl?: string;
   pixCopyPaste?: string;
   pixQrCodeBase64?: string;
   expiresAt?: Date;
@@ -26,22 +29,34 @@ export class PaymentService {
         externalPaymentId: input.externalPaymentId,
         amountCents: input.amountCents,
         currency: input.currency ?? "BRL",
-        status: "CREATED",
-        pixCopyPaste: input.pixCopyPaste,
-        pixQrCodeBase64: input.pixQrCodeBase64,
+        status: input.status ?? "CREATED",
+        pixCopyPaste: input.pixCopyPaste ?? input.pixCode,
+        pixQrCodeBase64: input.pixQrCodeBase64 ?? input.pixQrCodeUrl,
         expiresAt: input.expiresAt,
       },
     });
   }
 
-  async findByExternalId(provider: string, externalId: string): Promise<Payment | null> {
-    return this.prisma.payment.findUnique({
-      where: {
-        provider_externalPaymentId: {
-          provider,
-          externalPaymentId: externalId,
+  async findByExternalId(externalId: string, provider?: string): Promise<Payment | null> {
+    if (provider) {
+      return this.prisma.payment.findUnique({
+        where: {
+          provider_externalPaymentId: {
+            provider,
+            externalPaymentId: externalId,
+          },
         },
-      },
+      });
+    }
+    return this.prisma.payment.findFirst({
+      where: { externalPaymentId: externalId },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async findById(paymentId: string): Promise<Payment | null> {
+    return this.prisma.payment.findUnique({
+      where: { id: paymentId },
     });
   }
 
@@ -81,20 +96,13 @@ export class PaymentService {
     });
   }
 
-  async markApproved(
-    provider: string,
-    externalId: string,
-    rawStatus?: string,
-  ): Promise<Payment | null> {
-    const payment = await this.findByExternalId(provider, externalId);
-    if (!payment) {
-      return null;
+  async markApproved(paymentId: string, rawStatus?: string): Promise<boolean> {
+    const payment = await this.findById(paymentId);
+    if (!payment || payment.status === "APPROVED") {
+      return false;
     }
 
-    if (payment.status === "APPROVED") {
-      return payment;
-    }
-
-    return this.updateStatus(payment.id, "APPROVED", rawStatus);
+    await this.updateStatus(payment.id, "APPROVED", rawStatus);
+    return true;
   }
 }

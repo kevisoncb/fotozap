@@ -2,7 +2,7 @@ import type {
   PrismaClient,
   Generation,
   GenerationStatus,
-} from "../../../../../generated/prisma/client.js";
+} from "@prisma/client";
 import { canApplyGenerationStatus, isTerminalGenerationStatus } from "@fotozap/shared";
 import type { Decimal } from "@prisma/client/runtime/library";
 

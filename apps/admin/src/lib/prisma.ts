@@ -1,4 +1,4 @@
-import { PrismaClient } from "../../../../generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
@@ -9,8 +9,7 @@ const globalForPrisma = globalThis as unknown as {
 function createPrismaClient() {
   // Check if DATABASE_URL is available
   if (!process.env.DATABASE_URL) {
-    console.warn("⚠️  DATABASE_URL not set - Prisma operations will fail");
-    console.warn("   Pages will load but data fetching will return errors");
+    // DATABASE_URL not set - Admin panel will show errors during data fetch
     // Return a client that will fail on actual database operations
     // but won't crash during import
     return new PrismaClient({

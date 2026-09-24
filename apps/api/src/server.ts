@@ -1,6 +1,6 @@
 import "dotenv/config";
 import Fastify from "fastify";
-import Redis from "ioredis";
+import IORedis from "ioredis";
 import { loadEnv } from "./config/env.js";
 import { createPrismaClient } from "./shared/prisma.js";
 import { registerHealthRoutes } from "./modules/health/routes.js";
@@ -51,7 +51,7 @@ async function main() {
 
   const prisma = env.DATABASE_URL ? createPrismaClient(env.DATABASE_URL) : undefined;
   const redis = env.REDIS_URL
-    ? new Redis(env.REDIS_URL, {
+    ? new IORedis.default(env.REDIS_URL, {
         maxRetriesPerRequest: 1,
         lazyConnect: true,
       })
@@ -259,6 +259,12 @@ async function main() {
 }
 
 main().catch((error: unknown) => {
-  console.error(error);
+  if (error instanceof Error) {
+    // eslint-disable-next-line no-console
+    console.error("Fatal server error:", error.message, error.stack);
+  } else {
+    // eslint-disable-next-line no-console
+    console.error("Fatal server error:", error);
+  }
   process.exit(1);
 });

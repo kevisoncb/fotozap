@@ -1,6 +1,6 @@
 import { Worker, Job } from "bullmq";
 import type { Redis } from "ioredis";
-import type { PrismaClient } from "../../../../generated/prisma/client.js";
+import type { PrismaClient } from "@prisma/client";
 import type { IObjectStorage } from "../providers/storage/storage.provider.interface.js";
 import { QUEUE_NAMES } from "../queues/queue-names.js";
 import type { CleanupJobData } from "../queues/cleanup.queue.js";
@@ -107,11 +107,11 @@ export function createCleanupWorker(deps: CleanupWorkerDeps): Worker<CleanupJobD
   );
 
   worker.on("completed", (job) => {
-    console.log(`[CleanupWorker] Job ${job.id} completed`);
+    job.log(`Cleanup worker job ${job.id} completed successfully`);
   });
 
   worker.on("failed", (job, err) => {
-    console.error(`[CleanupWorker] Job ${job?.id} failed:`, err.message);
+    job?.log(`Cleanup worker failed: ${err instanceof Error ? err.message : String(err)}`);
   });
 
   return worker;

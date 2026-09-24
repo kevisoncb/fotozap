@@ -3,7 +3,7 @@
  */
 
 import { headers } from "next/headers";
-import type { AdminRole } from "../../../../generated/prisma/client";
+import type { AdminRole } from "@prisma/client";
 
 export interface CurrentAdmin {
   id: string;

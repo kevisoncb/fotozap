@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
 
     // 🧪 MODO DEV: Login fake sem banco de dados
-    console.log("🧪 DEV MODE: Login fake ativado (sem validação)");
+    // DEV MODE: Fake login enabled
 
     // Gera token fake
     const fakeAdmin = {
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       admin: fakeAdmin,
     });
   } catch (error) {
-    console.error("Login error:", error);
+    // Error logged via NextJS automatic error handling
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }

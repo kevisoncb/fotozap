@@ -2,7 +2,7 @@
  * Script to create test admin (development only)
  */
 
-import { PrismaClient } from "../generated/prisma/client.js";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();

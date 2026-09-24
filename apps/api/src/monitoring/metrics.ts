@@ -75,8 +75,8 @@ class MetricsCollector {
       count: values.length,
       sum,
       avg: sum / values.length,
-      min: sorted[0],
-      max: sorted[sorted.length - 1],
+      min: sorted[0] ?? 0,
+      max: sorted[sorted.length - 1] ?? 0,
       p50: this.percentile(sorted, 0.5),
       p95: this.percentile(sorted, 0.95),
       p99: this.percentile(sorted, 0.99),
@@ -88,9 +88,9 @@ class MetricsCollector {
    */
   getAll(): {
     counters: MetricCounter;
-    histograms: Record<string, ReturnType<typeof this.getHistogram>>;
+    histograms: Record<string, ReturnType<MetricsCollector["getHistogram"]>>;
   } {
-    const histograms: Record<string, ReturnType<typeof this.getHistogram>> = {};
+    const histograms: Record<string, ReturnType<MetricsCollector["getHistogram"]>> = {};
 
     for (const key of Object.keys(this.histograms)) {
       histograms[key] = this.getHistogram(key);

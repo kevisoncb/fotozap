@@ -1,4 +1,4 @@
-import type { PrismaClient, Product } from "../../../../../generated/prisma/client.js";
+import type { PrismaClient, Product } from "@prisma/client";
 
 export class ProductService {
   constructor(private prisma: PrismaClient) {}

@@ -59,7 +59,7 @@ export class WhatsAppWebhookHandler {
       validatedPayload = validateWhatsAppWebhook(request.body);
     } catch (error) {
       if (error instanceof ZodError) {
-        request.log.warn({ errors: error.errors }, "Invalid WhatsApp webhook payload");
+        request.log.warn({ errors: error.issues }, "Invalid WhatsApp webhook payload");
         reply.code(400).send({ error: "Invalid payload structure" });
         return;
       }

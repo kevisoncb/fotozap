@@ -1,6 +1,6 @@
 import { Worker, Job } from "bullmq";
 import type { Redis } from "ioredis";
-import type { PrismaClient } from "../../../../generated/prisma/client.js";
+import type { PrismaClient } from "@prisma/client";
 import { QUEUE_NAMES } from "../queues/queue-names.js";
 import type { ExpirationJobData } from "../queues/expiration.queue.js";
 
@@ -69,11 +69,11 @@ export function createExpirationWorker(deps: ExpirationWorkerDeps): Worker<Expir
   );
 
   worker.on("completed", (job) => {
-    console.log(`[ExpirationWorker] Job ${job.id} completed`);
+    job.log(`Expiration worker job ${job.id} completed successfully`);
   });
 
   worker.on("failed", (job, err) => {
-    console.error(`[ExpirationWorker] Job ${job?.id} failed:`, err.message);
+    job?.log(`Expiration worker failed: ${err instanceof Error ? err.message : String(err)}`);
   });
 
   return worker;

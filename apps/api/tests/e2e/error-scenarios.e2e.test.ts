@@ -36,7 +36,7 @@ describe("E2E: Error Scenarios", () => {
   });
 
   it("deve cancelar pedido quando pagamento expira", async () => {
-    const user = await userService.findOrCreate("5511999887766");
+    const user = await userService.findOrCreate({ whatsappPhone: "5511999887766" });
     const products = await productService.listActive();
     const order = await orderService.create({
       userId: user.id,
@@ -87,7 +87,7 @@ describe("E2E: Error Scenarios", () => {
   });
 
   it("deve marcar pedido como FAILED quando geração falha", async () => {
-    const user = await userService.findOrCreate("5511999887766");
+    const user = await userService.findOrCreate({ whatsappPhone: "5511999887766" });
     const products = await productService.listActive();
     const order = await orderService.create({
       userId: user.id,
@@ -143,7 +143,7 @@ describe("E2E: Error Scenarios", () => {
   });
 
   it("deve rejeitar transição inválida de CREATED para COMPLETED", async () => {
-    const user = await userService.findOrCreate("5511999887766");
+    const user = await userService.findOrCreate({ whatsappPhone: "5511999887766" });
     const products = await productService.listActive();
     const order = await orderService.create({
       userId: user.id,
@@ -163,7 +163,7 @@ describe("E2E: Error Scenarios", () => {
   });
 
   it("deve rejeitar transição de COMPLETED para PROCESSING", async () => {
-    const user = await userService.findOrCreate("5511999887766");
+    const user = await userService.findOrCreate({ whatsappPhone: "5511999887766" });
     const products = await productService.listActive();
     const order = await orderService.create({
       userId: user.id,
@@ -196,7 +196,7 @@ describe("E2E: Error Scenarios", () => {
   });
 
   it("deve prevenir múltiplas gerações simultâneas no mesmo pedido", async () => {
-    const user = await userService.findOrCreate("5511999887766");
+    const user = await userService.findOrCreate({ whatsappPhone: "5511999887766" });
     const products = await productService.listActive();
     const order = await orderService.create({
       userId: user.id,
@@ -236,7 +236,7 @@ describe("E2E: Error Scenarios", () => {
   });
 
   it("deve marcar mensagem como duplicada se externalMessageId já existe", async () => {
-    const user = await userService.findOrCreate("5511999887766");
+    const user = await userService.findOrCreate({ whatsappPhone: "5511999887766" });
 
     // Primeira mensagem
     const message1 = await prisma.message.create({
@@ -266,7 +266,7 @@ describe("E2E: Error Scenarios", () => {
   });
 
   it("deve lidar com produto inativo na criação de pedido", async () => {
-    const user = await userService.findOrCreate("5511999887766");
+    const user = await userService.findOrCreate({ whatsappPhone: "5511999887766" });
 
     // Cria produto inativo
     const inactiveProduct = await prisma.product.create({
@@ -303,7 +303,7 @@ describe("E2E: Error Scenarios", () => {
   });
 
   it("deve lidar com usuário deletado (soft delete)", async () => {
-    const user = await userService.findOrCreate("5511999887766");
+    const user = await userService.findOrCreate({ whatsappPhone: "5511999887766" });
 
     // Marca usuário como deletado
     await userService.markDeleted(user.id);

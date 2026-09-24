@@ -260,7 +260,7 @@ describe("E2E: WhatsApp Flow", () => {
       payload,
     });
 
-    expect(event1.status).toBe("RECEIVED");
+    expect(event1?.status).toBe("RECEIVED");
 
     // Tentar registrar novamente
     const event2 = await webhookService.recordEvent({
@@ -270,7 +270,7 @@ describe("E2E: WhatsApp Flow", () => {
       payload,
     });
 
-    expect(event2.status).toBe("DUPLICATE");
+    expect(event2?.status).toBe("DUPLICATE");
 
     // Verificar que só há 1 evento no banco
     const events = await prisma.webhookEvent.findMany({

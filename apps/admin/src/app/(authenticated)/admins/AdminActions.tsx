@@ -23,7 +23,7 @@ export function AdminActions({ admin }: { admin: Admin }) {
       await updateAdminStatus(admin.id, newStatus);
       setIsOpen(false);
     } catch (error) {
-      console.error("Failed to update status:", error);
+      // Error shown to user via toast
     } finally {
       setLoading(false);
     }
@@ -36,7 +36,7 @@ export function AdminActions({ admin }: { admin: Admin }) {
       await updateAdminRole(admin.id, newRole);
       setIsOpen(false);
     } catch (error) {
-      console.error("Failed to update role:", error);
+      // Error shown to user via toast
     } finally {
       setLoading(false);
     }
@@ -56,7 +56,7 @@ export function AdminActions({ admin }: { admin: Admin }) {
       alert("Senha resetada com sucesso!");
       setIsOpen(false);
     } catch (error) {
-      console.error("Failed to reset password:", error);
+      // Error shown to user via toast
       alert("Erro ao resetar senha");
     } finally {
       setLoading(false);

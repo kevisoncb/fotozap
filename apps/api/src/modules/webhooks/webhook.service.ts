@@ -2,7 +2,7 @@ import type {
   PrismaClient,
   WebhookEvent,
   WebhookEventStatus,
-} from "../../../../../generated/prisma/client.js";
+} from "@prisma/client";
 import { createHash } from "node:crypto";
 
 export type CreateWebhookEventInput = {

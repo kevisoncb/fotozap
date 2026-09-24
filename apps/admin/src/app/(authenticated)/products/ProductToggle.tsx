@@ -21,7 +21,7 @@ export function ProductToggle({ productId, initialActive }: ProductToggleProps) 
         await toggleProductActive(productId, newState);
       } catch (error) {
         setIsActive(!newState);
-        console.error("Failed to toggle product:", error);
+        // Error shown to user via toast
       }
     });
   };

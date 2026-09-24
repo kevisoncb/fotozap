@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "engines": {
-    "node": ">=24.21.0"
+    "node": ">=24.10.0"
   },
   "workspaces": [
     "apps/*",
@@ -14,7 +14,8 @@
     "dev": "npm run dev -w @fotozap/api",
     "dev:admin": "npm run dev -w @fotozap/admin",
     "dev:worker": "npm run worker -w @fotozap/api",
-    "build": "npm run db:generate && npm run build --workspaces --if-present",
+    "build": "npm run db:generate && npm run build:shared && npm run build --workspaces --if-present",
+    "build:shared": "npm run build -w @fotozap/shared",
     "build:api": "npm run build -w @fotozap/api",
     "build:admin": "npm run build -w @fotozap/admin",
     "start": "npm run start -w @fotozap/api",
@@ -51,6 +52,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^24.5.2",
     "@types/pg": "^8.15.5",
     "eslint": "^9.36.0",

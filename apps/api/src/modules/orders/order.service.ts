@@ -1,4 +1,4 @@
-import type { PrismaClient, Order, OrderStatus } from "../../../../../generated/prisma/client.js";
+import type { PrismaClient, Order, OrderStatus } from "@prisma/client";
 import { canTransitionOrder } from "@fotozap/shared";
 
 export type CreateOrderInput = {

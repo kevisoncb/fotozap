@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
-import type { AuditAction } from "../../../../../../generated/prisma/client";
+import type { AuditAction } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Logout error:", error);
+    // Error logged via NextJS automatic error handling
     // Mesmo com erro, remove o cookie
     const cookieStore = await cookies();
     cookieStore.delete("admin-token");

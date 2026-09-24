@@ -4,7 +4,7 @@
  * Usage: tsx scripts/create-first-admin.ts
  */
 
-import { PrismaClient } from "../generated/prisma/client.js";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import * as readline from "readline/promises";
 import { stdin as input, stdout as output } from "process";
