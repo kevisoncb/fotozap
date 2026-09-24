@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { hasUsableSecrets } from "./secrets.js";
 
 const boolish = z
   .string()
@@ -9,7 +10,8 @@ const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   LOG_LEVEL: z.string().default("info"),
   API_HOST: z.string().default("0.0.0.0"),
-  API_PORT: z.coerce.number().int().positive().default(3001),
+  API_PORT: z.coerce.number().int().positive().optional(),
+  PORT: z.coerce.number().int().positive().optional(),
   DATABASE_URL: z.string().min(1).optional(),
   REDIS_URL: z.string().min(1).optional(),
   CONVERSATION_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
@@ -43,11 +45,16 @@ const schema = z.object({
   R2_BUCKET: z.string().optional(),
   R2_PUBLIC_URL: z.string().optional(),
   ADMIN_SESSION_SECRET: z.string().min(16).optional(),
+  JWT_SECRET: z.string().optional(),
   ADMIN_PASSWORD: z.string().min(6).optional(),
   STRICT_ENV: boolish,
 });
 
-export type AppEnv = z.infer<typeof schema>;
+type ParsedEnv = z.infer<typeof schema>;
+
+export type AppEnv = Omit<ParsedEnv, "API_PORT" | "PORT"> & {
+  API_PORT: number;
+};
 
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): AppEnv {
   const parsed = schema.parse(source);
@@ -57,11 +64,59 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): AppEnv {
     const missing: string[] = [];
     if (!parsed.DATABASE_URL) missing.push("DATABASE_URL");
     if (!parsed.REDIS_URL) missing.push("REDIS_URL");
-    if (!parsed.ADMIN_SESSION_SECRET) missing.push("ADMIN_SESSION_SECRET");
     if (missing.length > 0) {
       throw new Error(`Missing required production env: ${missing.join(", ")}`);
     }
   }
 
-  return parsed;
+  const whatsappProvider =
+    parsed.WHATSAPP_PROVIDER === "real" &&
+    hasUsableSecrets(
+      parsed.WHATSAPP_ACCESS_TOKEN,
+      parsed.WHATSAPP_PHONE_NUMBER_ID,
+      parsed.WHATSAPP_VERIFY_TOKEN,
+      parsed.WHATSAPP_APP_SECRET,
+    )
+      ? "real"
+      : "mock";
+
+  const paymentProvider =
+    parsed.PAYMENT_PROVIDER === "real" && hasUsableSecrets(parsed.MERCADOPAGO_ACCESS_TOKEN)
+      ? "real"
+      : "mock";
+
+  const imageProvider =
+    parsed.IMAGE_PROVIDER === "openai" && hasUsableSecrets(parsed.OPENAI_API_KEY)
+      ? "openai"
+      : "mock";
+
+  const storageProvider =
+    parsed.STORAGE_PROVIDER === "r2" &&
+    hasUsableSecrets(
+      parsed.R2_ACCOUNT_ID,
+      parsed.R2_ACCESS_KEY_ID,
+      parsed.R2_SECRET_ACCESS_KEY,
+      parsed.R2_BUCKET,
+      parsed.R2_PUBLIC_URL,
+    )
+      ? "r2"
+      : "mock";
+
+  const adminSessionSecret =
+    parsed.ADMIN_SESSION_SECRET && parsed.ADMIN_SESSION_SECRET.length >= 16
+      ? parsed.ADMIN_SESSION_SECRET
+      : parsed.JWT_SECRET && parsed.JWT_SECRET.length >= 16
+        ? parsed.JWT_SECRET
+        : parsed.ADMIN_SESSION_SECRET;
+
+  return {
+    ...parsed,
+    API_HOST: parsed.API_HOST || "0.0.0.0",
+    API_PORT: parsed.PORT ?? parsed.API_PORT ?? 3001,
+    ADMIN_SESSION_SECRET: adminSessionSecret,
+    WHATSAPP_PROVIDER: whatsappProvider,
+    PAYMENT_PROVIDER: paymentProvider,
+    IMAGE_PROVIDER: imageProvider,
+    STORAGE_PROVIDER: storageProvider,
+  };
 }

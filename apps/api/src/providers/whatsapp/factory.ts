@@ -1,3 +1,4 @@
+import { hasUsableSecrets } from "../../config/secrets.js";
 import type { IWhatsAppProvider } from "./whatsapp.provider.interface.js";
 import { MockWhatsAppProvider } from "./mock.provider.js";
 import { WhatsAppCloudProvider } from "./cloud.provider.js";
@@ -14,14 +15,19 @@ export function createWhatsAppProvider(
     apiVersion?: string;
   },
 ): IWhatsAppProvider {
-  if (mode === "mock") {
+  const canUseReal = hasUsableSecrets(
+    config?.accessToken,
+    config?.phoneNumberId,
+    config?.verifyToken,
+    config?.appSecret,
+  );
+
+  if (mode === "mock" || !canUseReal) {
     return new MockWhatsAppProvider();
   }
 
   if (!config?.accessToken || !config?.phoneNumberId || !config?.verifyToken || !config?.appSecret) {
-    throw new Error(
-      "WhatsApp Cloud API requires: WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_VERIFY_TOKEN, WHATSAPP_APP_SECRET",
-    );
+    return new MockWhatsAppProvider();
   }
 
   return new WhatsAppCloudProvider({

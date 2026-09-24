@@ -1,3 +1,4 @@
+import { hasUsableSecrets } from "../../config/secrets.js";
 import type { IObjectStorage, StorageProviderMode } from "./storage.provider.interface.js";
 import { MockObjectStorage } from "./mock.provider.js";
 import { R2ObjectStorage } from "./r2.provider.js";
@@ -12,7 +13,15 @@ export function createStorageProvider(
     publicUrl?: string;
   },
 ): IObjectStorage {
-  if (mode === "mock") {
+  const canUseR2 = hasUsableSecrets(
+    config?.accountId,
+    config?.accessKeyId,
+    config?.secretAccessKey,
+    config?.bucket,
+    config?.publicUrl,
+  );
+
+  if (mode === "mock" || !canUseR2) {
     return new MockObjectStorage();
   }
 
@@ -23,9 +32,7 @@ export function createStorageProvider(
     !config?.bucket ||
     !config?.publicUrl
   ) {
-    throw new Error(
-      "R2 storage requires: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_PUBLIC_URL",
-    );
+    return new MockObjectStorage();
   }
 
   return new R2ObjectStorage({

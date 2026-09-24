@@ -1,3 +1,4 @@
+import { hasUsableSecrets } from "../../config/secrets.js";
 import type { IImageProvider, ImageProviderMode } from "./image.provider.interface.js";
 import { MockImageProvider } from "./mock.provider.js";
 import { OpenAIImageProvider } from "./openai.provider.js";
@@ -11,12 +12,12 @@ export function createImageProvider(
     quality?: "standard" | "hd";
   },
 ): IImageProvider {
-  if (mode === "mock") {
+  if (mode === "mock" || !hasUsableSecrets(config?.apiKey)) {
     return new MockImageProvider();
   }
 
   if (!config?.apiKey) {
-    throw new Error("OpenAI provider requires OPENAI_API_KEY");
+    return new MockImageProvider();
   }
 
   return new OpenAIImageProvider({

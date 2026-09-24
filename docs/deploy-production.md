@@ -2,6 +2,9 @@
 
 Status: **PRONTO PARA DEPLOY**
 
+> 🔧 **IMPORTANTE:** Este guia foi atualizado com correções para Railway/Render.  
+> Veja detalhes técnicos em [`CLOUD_FIXES.md`](./CLOUD_FIXES.md).
+
 ## 📋 Pré-requisitos
 
 Antes de começar, você precisará:

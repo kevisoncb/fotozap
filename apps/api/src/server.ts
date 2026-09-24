@@ -1,8 +1,5 @@
 import "dotenv/config";
 import Fastify from "fastify";
-import cors from "@fastify/cors";
-import helmet from "@fastify/helmet";
-import rateLimit from "@fastify/rate-limit";
 import Redis from "ioredis";
 import { loadEnv } from "./config/env.js";
 import { createPrismaClient } from "./shared/prisma.js";
@@ -52,8 +49,6 @@ async function main() {
     },
   });
 
-  // (CORS will be registered after helmet below)
-
   const prisma = env.DATABASE_URL ? createPrismaClient(env.DATABASE_URL) : undefined;
   const redis = env.REDIS_URL
     ? new Redis(env.REDIS_URL, {
@@ -61,6 +56,13 @@ async function main() {
         lazyConnect: true,
       })
     : undefined;
+
+  app.get("/", async () => ({
+    service: "fotozap-api",
+    status: "ok",
+    health: "/health",
+    ready: "/ready",
+  }));
 
   registerHealthRoutes(app, { prisma, redis });
 
@@ -96,6 +98,21 @@ async function main() {
     const imageProvider = createImageProvider(env.IMAGE_PROVIDER, {
       apiKey: env.OPENAI_API_KEY,
     });
+
+    if (process.env.WHATSAPP_PROVIDER === "real" && env.WHATSAPP_PROVIDER === "mock") {
+      app.log.warn(
+        "WhatsApp credentials are missing or placeholder (e.g. aguardando_meta). Using mock provider so the API can boot.",
+      );
+    }
+    if (process.env.PAYMENT_PROVIDER === "real" && env.PAYMENT_PROVIDER === "mock") {
+      app.log.warn("Mercado Pago token is missing or placeholder. Using mock payment provider.");
+    }
+    if (process.env.IMAGE_PROVIDER === "openai" && env.IMAGE_PROVIDER === "mock") {
+      app.log.warn("OpenAI API key is missing or placeholder. Using mock image provider.");
+    }
+    if (process.env.STORAGE_PROVIDER === "r2" && env.STORAGE_PROVIDER === "mock") {
+      app.log.warn("R2 credentials are missing or placeholder. Using mock storage provider.");
+    }
 
     // Queues
     const generationQueue = createGenerationQueue(redis);
@@ -236,7 +253,9 @@ async function main() {
     redis?.disconnect();
   });
 
-  await app.listen({ host: env.API_HOST, port: env.API_PORT });
+  const port = Number(process.env.PORT ?? env.API_PORT);
+  await app.listen({ host: "0.0.0.0", port });
+  app.log.info({ host: "0.0.0.0", port }, "HTTP server listening");
 }
 
 main().catch((error: unknown) => {

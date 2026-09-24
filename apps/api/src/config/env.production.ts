@@ -14,24 +14,8 @@ export function validateProductionEnv() {
     'REDIS_URL',
   ];
 
-  // Required for production
-  if (process.env.NODE_ENV === 'production') {
-    required.push(
-      'WHATSAPP_ACCESS_TOKEN',
-      'WHATSAPP_PHONE_NUMBER_ID',
-      'WHATSAPP_VERIFY_TOKEN',
-      'WHATSAPP_APP_SECRET',
-      'MERCADOPAGO_ACCESS_TOKEN',
-      'MERCADOPAGO_WEBHOOK_SECRET',
-      'OPENAI_API_KEY',
-      'R2_ACCOUNT_ID',
-      'R2_ACCESS_KEY_ID',
-      'R2_SECRET_ACCESS_KEY',
-      'R2_BUCKET',
-      'R2_PUBLIC_URL',
-      'JWT_SECRET'
-    );
-  }
+  // Production boot only requires data stores. Provider secrets may be
+  // placeholders (e.g. aguardando_meta) until Meta/OpenAI/R2 are ready.
 
   for (const varName of required) {
     if (!process.env[varName]) {
